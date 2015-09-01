@@ -7,6 +7,7 @@ import net.glowstone.block.ItemTable;
 import net.glowstone.block.blocktype.BlockType;
 import net.glowstone.block.entity.TileEntity;
 import net.glowstone.entity.GlowEntity;
+import net.glowstone.io.anvil.AnvilChunkIoService;
 import net.glowstone.net.message.play.game.ChunkDataMessage;
 import net.glowstone.util.NibbleArray;
 import org.bukkit.Chunk;
@@ -14,6 +15,7 @@ import org.bukkit.World;
 import org.bukkit.entity.Entity;
 import org.bukkit.event.world.ChunkUnloadEvent;
 
+import java.io.IOException;
 import java.util.*;
 import java.util.logging.Level;
 
@@ -125,7 +127,7 @@ public final class GlowChunk implements Chunk {
     /**
      * The array of chunk sections this chunk contains, or null if it is unloaded.
      */
-    private ChunkSection[] sections;
+    private List<ChunkSection> sections;
 
     /**
      * The array of biomes this chunk contains, or null if it is unloaded.
@@ -226,7 +228,7 @@ public final class GlowChunk implements Chunk {
 
     @Override
     public GlowChunkSnapshot getChunkSnapshot(boolean includeMaxBlockY, boolean includeBiome, boolean includeBiomeTempRain) {
-        return new GlowChunkSnapshot(x, z, world, sections,
+        return new GlowChunkSnapshot(x, z, world, sections.toArray(new ChunkSection[sections.size()]),
                 includeMaxBlockY ? heightMap.clone() : null,
                 includeBiome ? biomes.clone() : null,
                 includeBiomeTempRain);
@@ -298,11 +300,10 @@ public final class GlowChunk implements Chunk {
         tileEntities.clear();
         return true;
     }
-
     /**
      * Initialize this chunk from the given sections.
      * @param initSections The ChunkSections to use.
-     */
+     **/
     public void initializeSections(ChunkSection[] initSections) {
         if (isLoaded()) {
             GlowServer.logger.log(Level.SEVERE, "Tried to initialize already loaded chunk (" + x + "," + z + ")", new Throwable());
@@ -310,15 +311,14 @@ public final class GlowChunk implements Chunk {
         }
         //GlowServer.logger.log(Level.INFO, "Initializing chunk ({0},{1})", new Object[]{x, z});
 
-        sections = new ChunkSection[DEPTH / SEC_DEPTH];
-        System.arraycopy(initSections, 0, sections, 0, Math.min(sections.length, initSections.length));
+        sections = Arrays.asList(initSections);
 
         biomes = new byte[WIDTH * HEIGHT];
         heightMap = new byte[WIDTH * HEIGHT];
 
         // tile entity initialization
-        for (int i = 0; i < sections.length; ++i) {
-            if (sections[i] == null) continue;
+        for (int i = 0; i < sections.size(); ++i) {
+            if (sections.get(i) == null) continue;
             int by = 16 * i;
             for (int cx = 0; cx < WIDTH; ++cx) {
                 for (int cz = 0; cz < HEIGHT; ++cz) {
@@ -327,6 +327,24 @@ public final class GlowChunk implements Chunk {
                     }
                 }
             }
+        }
+
+        sections = new LinkedList<>();
+    }
+
+    public void loadSection(int index) {
+        try {
+            sections.add(((AnvilChunkIoService) getWorld().getStorage().getChunkIoService()).loadChunkSection(this, index));
+        } catch (IOException e) {
+            GlowServer.logger.log(Level.SEVERE, "Error loading ChunkSection: ", e);
+        }
+    }
+
+    public void unloadSection(int index) {
+        try {
+            sections.remove(((AnvilChunkIoService) getWorld().getStorage().getChunkIoService()).loadChunkSection(this, index));
+        } catch (IOException e) {
+            GlowServer.logger.log(Level.SEVERE, "Error unloading ChunkSection: ", e);
         }
     }
 
@@ -356,10 +374,10 @@ public final class GlowChunk implements Chunk {
      */
     private ChunkSection getSection(int y) {
         int idx = y >> 4;
-        if (y < 0 || y >= DEPTH || !load() || idx >= sections.length) {
+        if (y < 0 || y >= DEPTH || !load() || idx >= sections.size()) {
             return null;
         }
-        return sections[idx];
+        return sections.get(idx);
     }
 
     /**
@@ -367,7 +385,7 @@ public final class GlowChunk implements Chunk {
      * @return The chunk sections array.
      */
     public ChunkSection[] getSections() {
-        return sections;
+        return sections.toArray(new ChunkSection[sections.size()]);
     }
 
     /**
@@ -414,11 +432,12 @@ public final class GlowChunk implements Chunk {
             } else {
                 // create new ChunkSection for this y coordinate
                 int idx = y >> 4;
-                if (y < 0 || y >= DEPTH || idx >= sections.length) {
+                if (y < 0 || y >= DEPTH || idx >= sections.size()) {
                     // y is out of range somehow
                     return;
                 }
-                sections[idx] = section = new ChunkSection();
+                section = new ChunkSection();
+                sections.set(idx, section);
             }
         }
 
@@ -453,7 +472,7 @@ public final class GlowChunk implements Chunk {
 
         if (type == 0 && section.count == 0) {
             // destroy the empty section
-            sections[y / SEC_DEPTH] = null;
+            sections.set(y / SEC_DEPTH, null);
             return;
         }
 
@@ -621,9 +640,9 @@ public final class GlowChunk implements Chunk {
      */
     public void automaticHeightMap() {
         // determine max Y chunk section at a time
-        int sy = sections.length - 1;
+        int sy = sections.size() - 1;
         for (; sy >= 0; --sy) {
-            if (sections[sy] != null) {
+            if (sections.get(sy) != null) {
                 break;
             }
         }
@@ -687,17 +706,17 @@ public final class GlowChunk implements Chunk {
             sectionBitmask = 0;
             sectionCount = 0;
         } else {
-            final int maxBitmask = (1 << sections.length) - 1;
+            final int maxBitmask = (1 << sections.size()) - 1;
             if (entireChunk) {
                 sectionBitmask = maxBitmask;
-                sectionCount = sections.length;
+                sectionCount = sections.size();
             } else {
                 sectionBitmask &= maxBitmask;
                 sectionCount = countBits(sectionBitmask);
             }
 
-            for (int i = 0; i < sections.length; ++i) {
-                if (sections[i] == null || sections[i].count == 0) {
+            for (int i = 0; i < sections.size(); ++i) {
+                if (sections.get(i) == null || sections.get(i).count == 0) {
                     // remove empty sections from bitmask
                     sectionBitmask &= ~(1 << i);
                     sectionCount--;
@@ -727,9 +746,9 @@ public final class GlowChunk implements Chunk {
         if (sections != null) {
             // get the list of sections
             ChunkSection[] sendSections = new ChunkSection[sectionCount];
-            for (int i = 0, j = 0, mask = 1; i < sections.length; ++i, mask <<= 1) {
+            for (int i = 0, j = 0, mask = 1; i < sections.size(); ++i, mask <<= 1) {
                 if ((sectionBitmask & mask) != 0) {
-                    sendSections[j++] = sections[i];
+                    sendSections[j++] = sections.get(i);
                 }
             }
 

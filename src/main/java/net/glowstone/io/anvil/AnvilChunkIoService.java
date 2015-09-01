@@ -140,6 +140,44 @@ public final class AnvilChunkIoService implements ChunkIoService {
         return true;
     }
 
+    public ChunkSection loadChunkSection(GlowChunk chunk, int index) throws IOException {
+        int x = chunk.getX(), z = chunk.getZ();
+        RegionFile region = cache.getRegionFile(x, z);
+        int regionX = x & (REGION_SIZE - 1);
+        int regionZ = z & (REGION_SIZE - 1);
+        if (!region.hasChunk(regionX, regionZ)) {
+            return null;
+        }
+
+        DataInputStream in = region.getChunkDataInputStream(regionX, regionZ);
+
+        CompoundTag levelTag;
+        try (NBTInputStream nbt = new NBTInputStream(in, false)) {
+            CompoundTag root = nbt.readCompound();
+            levelTag = root.getCompound("Level");
+        }
+
+        // read the vertical sections
+        List<CompoundTag> sectionList = levelTag.getCompoundList("Sections");
+        for (CompoundTag sectionTag : sectionList) {
+            int y = sectionTag.getByte("Y");
+            byte[] rawTypes = sectionTag.getByteArray("Blocks");
+            NibbleArray extTypes = sectionTag.containsKey("Add") ? new NibbleArray(sectionTag.getByteArray("Add")) : null;
+            NibbleArray data = new NibbleArray(sectionTag.getByteArray("Data"));
+            NibbleArray blockLight = new NibbleArray(sectionTag.getByteArray("BlockLight"));
+            NibbleArray skyLight = new NibbleArray(sectionTag.getByteArray("SkyLight"));
+
+            char[] types = new char[rawTypes.length];
+            for (int i = 0; i < rawTypes.length; i++) {
+                types[i] = (char) (((extTypes == null ? 0 : extTypes.get(i)) << 12) | ((rawTypes[i] & 0xff) << 4) | data.get(i));
+            }
+            if (y == index) {
+                return new ChunkSection(types, skyLight, blockLight);
+            }
+        }
+        return null;
+    }
+
     /**
      * Writes a chunk to its region file.
      * @param chunk The {@link GlowChunk} to write from.

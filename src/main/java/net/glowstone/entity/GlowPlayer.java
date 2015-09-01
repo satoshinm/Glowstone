@@ -645,6 +645,7 @@ public final class GlowPlayer extends GlowHumanEntity implements Player {
 
             bulkSize += messageSize;
             messages.add(message);
+            chunk.loadSection(getLocation().getBlockY() >> 4);
         }
 
         // send the leftovers

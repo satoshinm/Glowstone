@@ -1,0 +1,9 @@
+{
+  "required": true,
+  "package": "net.glowstone.mixin",
+  "priority": 1000,
+  "mixins": [
+    "entity.MixinPlayer",
+    "scoreboard.MixinScoreboard"
+  ]
+}

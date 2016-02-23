@@ -92,6 +92,7 @@ public final class ConsoleManager {
         replacements.put(ChatColor.UNDERLINE, Ansi.ansi().a(Ansi.Attribute.UNDERLINE).toString());
         replacements.put(ChatColor.ITALIC, Ansi.ansi().a(Ansi.Attribute.ITALIC).toString());
         replacements.put(ChatColor.RESET, Ansi.ansi().a(Ansi.Attribute.RESET).toString());
+        CommandCompleter.class.getName();
     }
 
     public ConsoleCommandSender getSender() {

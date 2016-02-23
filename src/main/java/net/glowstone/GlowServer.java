@@ -4,8 +4,11 @@ import com.avaje.ebean.config.DataSourceConfig;
 import com.avaje.ebean.config.dbplatform.SQLitePlatform;
 import com.avaje.ebeaninternal.server.lib.sql.TransactionIsolation;
 import com.flowpowered.networking.Message;
+import com.google.inject.Guice;
+import com.google.inject.Injector;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
+import lombok.Getter;
 import net.glowstone.block.BuiltinMaterialValueManager;
 import net.glowstone.block.MaterialValueManager;
 import net.glowstone.block.state.GlowDispenser;
@@ -22,6 +25,7 @@ import net.glowstone.generator.NetherGenerator;
 import net.glowstone.generator.OverworldGenerator;
 import net.glowstone.generator.SuperflatGenerator;
 import net.glowstone.generator.TheEndGenerator;
+import net.glowstone.guice.GlowGuiceModule;
 import net.glowstone.inventory.GlowInventory;
 import net.glowstone.inventory.GlowItemFactory;
 import net.glowstone.inventory.crafting.CraftingManager;
@@ -33,6 +37,7 @@ import net.glowstone.net.SessionRegistry;
 import net.glowstone.net.message.play.game.ChatMessage;
 import net.glowstone.net.query.QueryServer;
 import net.glowstone.net.rcon.RconServer;
+import net.glowstone.plugin.GlowPluginManager;
 import net.glowstone.scheduler.GlowScheduler;
 import net.glowstone.scheduler.WorldScheduler;
 import net.glowstone.scoreboard.GlowScoreboardManager;
@@ -56,6 +61,8 @@ import org.bukkit.permissions.Permissible;
 import org.bukkit.permissions.Permission;
 import org.bukkit.permissions.PermissionDefault;
 import org.bukkit.plugin.*;
+import org.bukkit.plugin.Plugin;
+import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPluginLoader;
 import org.bukkit.plugin.messaging.Messenger;
 import org.bukkit.plugin.messaging.StandardMessenger;
@@ -64,6 +71,7 @@ import org.bukkit.util.permissions.DefaultPermissions;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
+import org.spongepowered.api.plugin.*;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -286,17 +294,20 @@ public final class GlowServer implements Server {
     /**
      * The command map of this server.
      */
-    private final SimpleCommandMap commandMap = new SimpleCommandMap(this);
+    private final SimpleCommandMap commandMap;
 
     /**
      * The plugin manager of this server.
      */
-    private final SimplePluginManager pluginManager = new SimplePluginManager(this, commandMap);
+    private final PluginManager pluginManager;
 
     /**
      * The plugin type detector of thi server.
      */
-    private GlowPluginTypeDetector pluginTypeDetector;
+    //private GlowPluginTypeDetector pluginTypeDetector;
+
+    @Getter
+    private Injector injector;
 
     /**
      * The plugin channel messenger for the server.
@@ -311,7 +322,7 @@ public final class GlowServer implements Server {
     /**
      * The scoreboard manager for the server.
      */
-    private final GlowScoreboardManager scoreboardManager =   new GlowScoreboardManager(this);
+    private final GlowScoreboardManager scoreboardManager = new GlowScoreboardManager(this);
 
     /**
      * The crafting manager for this server.
@@ -460,6 +471,10 @@ public final class GlowServer implements Server {
         whitelist = new UuidListFile(config.getFile("whitelist.json"));
         nameBans = new GlowBanList(this, BanList.Type.NAME);
         ipBans = new GlowBanList(this, BanList.Type.IP);
+        commandMap = new SimpleCommandMap(this);
+        pluginManager = new GlowPluginManager(this, commandMap);
+
+        injector = Guice.createInjector(new GlowGuiceModule(this, org.slf4j.LoggerFactory.getLogger(GlowServer.class)));
 
         Bukkit.setServer(this);
         loadConfig();
@@ -529,6 +544,8 @@ public final class GlowServer implements Server {
         enablePlugins(PluginLoadOrder.POSTWORLD);
         commandMap.registerServerAliases();
         scheduler.start();
+
+
     }
 
     private void checkTransfer(String name, String suffix, Environment environment) {
@@ -740,13 +757,13 @@ public final class GlowServer implements Server {
         }
 
         // detect plugin types
-        pluginTypeDetector = new GlowPluginTypeDetector(folder, logger);
-        pluginTypeDetector.scan();
+        //pluginTypeDetector = new GlowPluginTypeDetector(folder, logger);
+        //pluginTypeDetector.scan();
 
         // clear plugins and prepare to load (Bukkit)
         pluginManager.clearPlugins();
         pluginManager.registerInterface(JavaPluginLoader.class);
-        Plugin[] plugins = pluginManager.loadPlugins(pluginTypeDetector.bukkitPlugins.toArray(new File[0]), folder.getPath());
+        Plugin[] plugins = pluginManager.loadPlugins(folder);
 
         // call onLoad methods
         for (Plugin plugin : plugins) {
@@ -757,7 +774,7 @@ public final class GlowServer implements Server {
             }
         }
 
-        if (pluginTypeDetector.spongePlugins.size() != 0) {
+        /*if (pluginTypeDetector.spongePlugins.size() != 0) {
             boolean hasSponge = false;
             for (Plugin plugin : plugins) {
                 if (plugin.getName().equals("Bukkit2Sponge")) {
@@ -792,14 +809,14 @@ public final class GlowServer implements Server {
 
             for (File file : pluginTypeDetector.unrecognizedPlugins)
                 logger.log(Level.WARNING, "Unrecognized plugin not supported: " + file.getPath());
-       }
+       }*/
 
     }
 
     // API for Bukkit2Sponge
-    public List<File> getSpongePlugins() {
-        return pluginTypeDetector.spongePlugins;
-    }
+    //public List<File> getSpongePlugins() {
+    //    return pluginTypeDetector.spongePlugins;
+    //}
 
     /**
      * Enable all plugins of the given load order type.
@@ -1858,5 +1875,13 @@ public final class GlowServer implements Server {
 
     public int getPlayerSampleCount() {
         return config.getInt(ServerConfig.Key.PLAYER_SAMPLE_COUNT);
+    }
+
+    public InetSocketAddress getBoundAddress() {
+        String ip = getIp();
+        if (ip != null) {
+            return new InetSocketAddress(ip, getPort());
+        }
+        return null;
     }
 }

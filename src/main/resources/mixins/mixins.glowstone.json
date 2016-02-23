@@ -3,7 +3,10 @@
   "package": "net.glowstone.mixin",
   "priority": 1000,
   "mixins": [
+    "MixinServer",
     "entity.MixinPlayer",
+    "plugin.MixinPluginBase",
+    "plugin.MixinGlowPluginContainer",
     "scoreboard.MixinScoreboard"
   ]
 }

@@ -11,6 +11,7 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.generator.ChunkGenerator;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginDescriptionFile;
+import org.bukkit.plugin.PluginLoadOrder;
 import org.bukkit.plugin.PluginLoader;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -20,17 +21,18 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.io.File;
 import java.io.InputStream;
+import java.lang.reflect.Field;
 import java.util.List;
 import java.util.logging.Logger;
 
-@Mixin(GlowPluginContainer.class)
+@Mixin(value = GlowPluginContainer.class, remap = false)
 public abstract class MixinGlowPluginContainer implements Plugin {
 
-    @Shadow(remap = false)
+    @Shadow
     private Class<?> pluginClass;
-    @Shadow(remap = false)
+    @Shadow
     private Injector injector;
-    @Shadow(remap = false)
+    @Shadow
     private String version;
 
     private PluginDescriptionFile pluginDescriptionFile;
@@ -38,6 +40,14 @@ public abstract class MixinGlowPluginContainer implements Plugin {
     @Inject(method = "<init>", at = @At("RETURN"))
     public void onConstruct(CallbackInfo callbackInfo) {
         pluginDescriptionFile = new PluginDescriptionFile(getName(), version, pluginClass.getCanonicalName());
+
+        try {
+            Field f = PluginDescriptionFile.class.getDeclaredField("order");
+            f.setAccessible(true);
+            f.set(pluginDescriptionFile, PluginLoadOrder.STARTUP);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     public Plugin getHandle() {

@@ -56,9 +56,6 @@ public final class GlowPluginManager implements PluginManager {
     private boolean useTimings = false;
     private Collection<URL> ignoreURLs = null;
 
-    private List<SpongePrePlugin> spongePrePlugins = new ArrayList<>();
-    private List<BukkitPrePlugin> bukkitPrePlugins = new ArrayList<>();
-
     public GlowPluginManager(GlowServer instance, SimpleCommandMap commandMap) {
         server = instance;
         this.commandMap = commandMap;
@@ -649,6 +646,12 @@ public final class GlowPluginManager implements PluginManager {
                 Plugin result = pluginLoader.loadPlugin(file);
                 IGlowPlugin container = (IGlowPlugin) result;
                 plugins.put(container.getId(), container);
+                try {
+                    result.onLoad();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+
                 return result;
             } catch (Exception e) {
                 e.printStackTrace();

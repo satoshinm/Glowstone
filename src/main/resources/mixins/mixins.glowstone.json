@@ -6,6 +6,7 @@
     "MixinServer",
     "entity.MixinPlayer",
     "plugin.MixinPluginBase",
+    "plugin.MixinGlowPluginManager",
     "plugin.MixinGlowPluginContainer",
     "scoreboard.MixinScoreboard"
   ]

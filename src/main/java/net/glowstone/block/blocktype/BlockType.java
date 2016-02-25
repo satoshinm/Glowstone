@@ -64,8 +64,8 @@ public class BlockType extends ItemType {
     }
 
     /**
-     * Gets the sound that will be played when a player places the block.
-     * @return The sound to be played
+     * Sets the sound that will be played when a player places the block.
+     * @param sound The sound.
      */
     public void setPlaceSound(Sound sound) {
         placeSound = new SoundInfo(sound, 1F, 0.75F);

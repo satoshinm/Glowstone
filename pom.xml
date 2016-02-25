@@ -155,7 +155,7 @@
                 </executions>
             </plugin>
 
-            <plugin>
+            <!--<plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-checkstyle-plugin</artifactId>
                 <version>2.16</version>
@@ -172,7 +172,7 @@
                     <headerLocation>${project.basedir}/LICENSE</headerLocation>
                     <excludes>net/glowstone/mixin/player/*</excludes>
                 </configuration>
-            </plugin>
+            </plugin>-->
 
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

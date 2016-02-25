@@ -35,7 +35,7 @@ public final class EntityStorage {
      */
     private static final Map<Class<? extends GlowEntity>, EntityStore<?>> classTable = new HashMap<>();
 
-    /**
+    /*
      * Populates the maps with stores.
      */
     static {
@@ -76,6 +76,7 @@ public final class EntityStorage {
         bind(new MonsterStore<>(GlowWitch.class, "Witch"));
 
 
+        bind(new ArmorStandStore());
         bind(new ItemStore());
         bind(new TNTPrimedStorage());
         bind(new ItemFrameStore());

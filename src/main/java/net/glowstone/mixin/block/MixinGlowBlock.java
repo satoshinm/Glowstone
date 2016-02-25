@@ -1,7 +1,10 @@
 package net.glowstone.mixin.block;
 
-/**
- * Created by kamcio96 on 25.02.2016.
- */
-public class MixinGlowBlock {
+import net.glowstone.block.GlowBlock;
+import org.spongepowered.api.block.BlockState;
+import org.spongepowered.asm.mixin.Mixin;
+
+@Mixin(value = GlowBlock.class, remap = false)
+public abstract class MixinGlowBlock implements BlockState {
+
 }

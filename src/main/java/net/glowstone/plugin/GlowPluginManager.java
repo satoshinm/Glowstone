@@ -2,7 +2,10 @@ package net.glowstone.plugin;
 
 import com.google.common.collect.ImmutableSet;
 import lombok.AllArgsConstructor;
+import lombok.Getter;
 import net.glowstone.GlowServer;
+import net.glowstone.event.EventRegister;
+import net.glowstone.event.GlowEventManager;
 import net.glowstone.interfaces.IGlowPlugin;
 import net.minecraft.launchwrapper.Launch;
 import org.apache.commons.lang3.Validate;
@@ -47,7 +50,6 @@ public final class GlowPluginManager implements PluginManager {
     private final GlowServer server;
     private final Map<Pattern, PluginLoader> fileAssociations = new HashMap<>();
     private final Map<String, IGlowPlugin> plugins = new HashMap<>();
-    private static File updateDirectory = null;
     private final SimpleCommandMap commandMap;
     private final Map<String, Permission> permissions = new HashMap<>();
     private final Map<Boolean, Set<Permission>> defaultPerms = new LinkedHashMap<>();
@@ -56,9 +58,15 @@ public final class GlowPluginManager implements PluginManager {
     private boolean useTimings = false;
     private Collection<URL> ignoreURLs = null;
 
+    private final EventRegister eventRegister;
+    @Getter
+    private final GlowEventManager glowEventManager;
+
     public GlowPluginManager(GlowServer instance, SimpleCommandMap commandMap) {
         server = instance;
         this.commandMap = commandMap;
+        this.eventRegister = new EventRegister();
+        this.glowEventManager = new GlowEventManager(eventRegister, this);
 
         defaultPerms.put(true, new HashSet<>());
         defaultPerms.put(false, new HashSet<>());
@@ -113,10 +121,6 @@ public final class GlowPluginManager implements PluginManager {
     public Plugin[] loadPlugins(File directory) {
         Validate.notNull(directory, "Directory cannot be null");
         Validate.isTrue(directory.isDirectory(), "Directory must be a directory");
-
-        if (!(server.getUpdateFolder().equals(""))) {
-            updateDirectory = new File(directory, server.getUpdateFolder());
-        }
 
         return this.loadPlugins(directory.listFiles(), directory.getPath());
     }
@@ -234,6 +238,10 @@ public final class GlowPluginManager implements PluginManager {
         IGlowPlugin raw = plugins.get(name.replace(' ', '_').toLowerCase());
         if (raw == null) return null;
         return raw.getHandle(); // Spigot
+    }
+
+    public synchronized IGlowPlugin getRawPlugin(String name) {
+        return plugins.get(name.replace(' ', '_').toLowerCase());
     }
 
     public synchronized Plugin[] getPlugins() {
@@ -379,33 +387,7 @@ public final class GlowPluginManager implements PluginManager {
     }
 
     private void fireEvent(Event event) {
-        HandlerList handlers = event.getHandlers();
-        RegisteredListener[] listeners = handlers.getRegisteredListeners();
-
-        for (RegisteredListener registration : listeners) {
-            if (!registration.getPlugin().isEnabled()) {
-                continue;
-            }
-
-            try {
-                registration.callEvent(event);
-            } catch (AuthorNagException ex) {
-                Plugin plugin = registration.getPlugin();
-
-                if (plugin.isNaggable()) {
-                    plugin.setNaggable(false);
-
-                    server.getLogger().log(Level.SEVERE, String.format(
-                            "Nag author(s): '%s' of '%s' about the following: %s",
-                            plugin.getDescription().getAuthors(),
-                            plugin.getDescription().getFullName(),
-                            ex.getMessage()
-                    ));
-                }
-            } catch (Throwable ex) {
-                server.getLogger().log(Level.SEVERE, "Could not pass event " + event.getEventName() + " to " + registration.getPlugin().getDescription().getFullName(), ex);
-            }
-        }
+        eventRegister.callEvent(event);
     }
 
     public void registerEvents(Listener listener, Plugin plugin) {
@@ -685,6 +667,7 @@ public final class GlowPluginManager implements PluginManager {
                     } catch (UnsupportedOperationException e) {
                         e.printStackTrace();
                     }
+                    glowEventManager.registerListeners(container, container.getInstance().get());
                     plugins.put(container.getId(), container);
                 } catch (ClassNotFoundException e) {
                     e.printStackTrace();

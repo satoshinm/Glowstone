@@ -4,10 +4,16 @@
   "priority": 1000,
   "mixins": [
     "MixinServer",
+    "block.MixinBlockType",
+    "block.MixinGlowBlock",
     "entity.MixinPlayer",
+    "event.MixinHandlerList",
+    "event.chunk.MixinChunkLoadEvent",
     "plugin.MixinPluginBase",
     "plugin.MixinGlowPluginManager",
     "plugin.MixinGlowPluginContainer",
-    "scoreboard.MixinScoreboard"
+    "scoreboard.MixinScoreboard",
+    "world.MixinGlowChunk",
+    "world.MixinGlowWorld"
   ]
 }

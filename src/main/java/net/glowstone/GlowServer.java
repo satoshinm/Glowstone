@@ -20,11 +20,7 @@ import net.glowstone.constants.GlowPotionEffect;
 import net.glowstone.entity.EntityIdManager;
 import net.glowstone.entity.GlowPlayer;
 import net.glowstone.entity.meta.profile.PlayerProfile;
-import net.glowstone.generator.GlowChunkData;
-import net.glowstone.generator.NetherGenerator;
-import net.glowstone.generator.OverworldGenerator;
-import net.glowstone.generator.SuperflatGenerator;
-import net.glowstone.generator.TheEndGenerator;
+import net.glowstone.generator.*;
 import net.glowstone.guice.GlowGuiceModule;
 import net.glowstone.inventory.GlowInventory;
 import net.glowstone.inventory.GlowItemFactory;
@@ -60,9 +56,10 @@ import org.bukkit.inventory.*;
 import org.bukkit.permissions.Permissible;
 import org.bukkit.permissions.Permission;
 import org.bukkit.permissions.PermissionDefault;
-import org.bukkit.plugin.*;
 import org.bukkit.plugin.Plugin;
-import org.bukkit.plugin.PluginManager;
+import org.bukkit.plugin.PluginLoadOrder;
+import org.bukkit.plugin.ServicesManager;
+import org.bukkit.plugin.SimpleServicesManager;
 import org.bukkit.plugin.java.JavaPluginLoader;
 import org.bukkit.plugin.messaging.Messenger;
 import org.bukkit.plugin.messaging.StandardMessenger;
@@ -71,7 +68,6 @@ import org.bukkit.util.permissions.DefaultPermissions;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
-import org.spongepowered.api.plugin.*;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -300,7 +296,7 @@ public final class GlowServer implements Server {
     /**
      * The plugin manager of this server.
      */
-    private final PluginManager pluginManager;
+    private final GlowPluginManager pluginManager;
 
     /**
      * The plugin type detector of thi server.
@@ -1106,7 +1102,7 @@ public final class GlowServer implements Server {
     // Access to Bukkit API
 
     @Override
-    public PluginManager getPluginManager() {
+    public GlowPluginManager getPluginManager() {
         return pluginManager;
     }
 

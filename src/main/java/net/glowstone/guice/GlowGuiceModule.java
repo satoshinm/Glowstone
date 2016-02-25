@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import net.glowstone.GlowServer;
 import org.slf4j.Logger;
 import org.spongepowered.api.Game;
+import org.spongepowered.api.event.EventManager;
 
 @AllArgsConstructor
 public class GlowGuiceModule extends AbstractModule {
@@ -27,7 +28,7 @@ public class GlowGuiceModule extends AbstractModule {
         //bind(MinecraftVersion.class).toInstance(SpongeImpl.MINECRAFT_VERSION);
         //bind(Platform.class).to(VanillaPlatform.class).in(Scopes.SINGLETON);
         //bind(PluginManager.class).toInstance((PluginManager) server.getPluginManager());
-        //bind(EventManager.class).toInstance((EventManager) server.getPluginManager());
+        bind(EventManager.class).toInstance(server.getPluginManager().getGlowEventManager());
         //bind(GameRegistry.class).to(SpongeGameRegistry.class).in(Scopes.SINGLETON);
         //bind(ServiceManager.class).to(SimpleServiceManager.class).in(Scopes.SINGLETON);
         //bind(TeleportHelper.class).to(SpongeTeleportHelper.class).in(Scopes.SINGLETON);

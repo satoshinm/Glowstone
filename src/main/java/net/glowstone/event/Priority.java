@@ -1,7 +1,9 @@
 package net.glowstone.event;
 
 import lombok.AllArgsConstructor;
+import net.glowstone.interfaces.IHandlerList;
 import org.bukkit.event.EventPriority;
+import org.bukkit.plugin.RegisteredListener;
 import org.spongepowered.api.event.Order;
 
 public class Priority {
@@ -83,9 +85,9 @@ public class Priority {
         }
     }
 
-    public void callBukkit(org.bukkit.event.Event event) { }
+    public void callBukkit(EventRegister register, org.bukkit.event.Event event) { }
 
-    public void callSponge(org.spongepowered.api.event.Event event) { }
+    public void callSponge(EventRegister register, org.spongepowered.api.event.Event event) { }
 
     @AllArgsConstructor
     private static class BukkitPriority extends Priority {
@@ -93,9 +95,14 @@ public class Priority {
         private final EventPriority priority;
 
         @Override
-        public void callBukkit(org.bukkit.event.Event event) {
+        public void callBukkit(EventRegister register, org.bukkit.event.Event event) {
+            for (RegisteredListener registration : ((IHandlerList) event.getHandlers()).getRegisteredListenersByPriority(priority)) {
+                if (!registration.getPlugin().isEnabled()) {
+                    continue;
+                }
 
-            //call bukkit event priority
+                register.fireBukkitEvent(event, registration);
+            }
         }
     }
 
@@ -105,8 +112,8 @@ public class Priority {
         private final Order order;
 
         @Override
-        public void callSponge(org.spongepowered.api.event.Event event) {
-            //call sponge event priority
+        public void callSponge(EventRegister register, org.spongepowered.api.event.Event event) {
+            register.fireSpongeEvent(event, order);
         }
     }
 }

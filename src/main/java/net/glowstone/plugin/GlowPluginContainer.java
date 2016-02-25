@@ -16,7 +16,7 @@ public class GlowPluginContainer implements IGlowPlugin {
 
     private final Class<?> pluginClass;
     private final Injector injector;
-    private final Object instance;
+    private final Optional<Object> instance;
     @Getter private final String name, id, version;
     @Getter private final Logger logger;
 
@@ -36,7 +36,7 @@ public class GlowPluginContainer implements IGlowPlugin {
 
     @Override
     public Optional<Object> getInstance() {
-        return Optional.of(instance);
+        return instance;
     }
 
     @Override

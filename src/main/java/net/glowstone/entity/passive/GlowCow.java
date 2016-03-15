@@ -2,6 +2,9 @@ package net.glowstone.entity.passive;
 
 import net.glowstone.entity.GlowAnimal;
 import net.glowstone.entity.GlowPlayer;
+import net.glowstone.entity.ai.EntityAiBase;
+import net.glowstone.entity.ai.basic.MoveAiTask;
+import net.glowstone.entity.ai.basic.RotateAiTask;
 import net.glowstone.entity.objects.GlowItem;
 import net.glowstone.net.message.play.player.InteractEntityMessage;
 import org.bukkit.GameMode;
@@ -11,11 +14,15 @@ import org.bukkit.entity.Cow;
 import org.bukkit.entity.EntityType;
 import org.bukkit.inventory.ItemStack;
 
-public class GlowCow extends GlowAnimal implements Cow {
+public class GlowCow extends GlowAnimal<GlowCow> implements Cow {
 
     public GlowCow(Location location) {
         super(location, EntityType.COW, 10);
         setSize(0.9F, 1.3F);
+
+        aiBase = new EntityAiBase<>();
+        aiBase.addTask(new MoveAiTask<>());
+        aiBase.addTask(new RotateAiTask<>());
     }
 
     @Override

@@ -1,6 +1,7 @@
 package net.glowstone.entity;
 
 import com.flowpowered.network.Message;
+import net.glowstone.entity.ai.EntityAiBase;
 import net.glowstone.net.message.play.entity.EntityHeadRotationMessage;
 import net.glowstone.net.message.play.entity.SpawnMobMessage;
 import net.glowstone.util.Position;
@@ -17,7 +18,7 @@ import java.util.List;
 /**
  * Represents a creature entity such as a pig.
  */
-public class GlowCreature extends GlowLivingEntity implements Creature {
+public class GlowCreature<E extends GlowLivingEntity> extends GlowLivingEntity implements Creature {
 
     /**
      * The type of monster.
@@ -28,6 +29,9 @@ public class GlowCreature extends GlowLivingEntity implements Creature {
      * The monster's target.
      */
     private LivingEntity target;
+
+    protected boolean aiEnabled = true;
+    protected EntityAiBase<E> aiBase;
 
     /**
      * Creates a new monster.
@@ -54,6 +58,15 @@ public class GlowCreature extends GlowLivingEntity implements Creature {
     @Override
     public boolean isGlowing() {
         return false;
+    }
+
+    @Override
+    public void pulse() {
+        super.pulse();
+
+        if (aiEnabled && aiBase != null) {
+            aiBase.pulse((E) this);
+        }
     }
 
     @Override

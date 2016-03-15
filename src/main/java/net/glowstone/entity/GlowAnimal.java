@@ -7,7 +7,7 @@ import org.bukkit.entity.EntityType;
 /**
  * Represents an Animal, such as a Cow
  */
-public class GlowAnimal extends GlowAgeable implements Animals {
+public class GlowAnimal<E extends GlowAnimal> extends GlowAgeable<E> implements Animals {
 
     /**
      * Creates a new ageable animal.

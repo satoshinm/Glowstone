@@ -6,6 +6,7 @@ import net.glowstone.EventFactory;
 import net.glowstone.GlowChunk;
 import net.glowstone.GlowServer;
 import net.glowstone.GlowWorld;
+import net.glowstone.block.GlowBlock;
 import net.glowstone.entity.meta.MetadataIndex;
 import net.glowstone.entity.meta.MetadataIndex.StatusFlags;
 import net.glowstone.entity.meta.MetadataMap;
@@ -287,7 +288,11 @@ public abstract class GlowEntity implements Entity {
 
     @Override
     public void setVelocity(Vector velocity) {
-        this.velocity.copy(velocity);
+        if (velocity == null) {
+            this.velocity.zero();
+        } else {
+            this.velocity.copy(velocity);
+        }
         velocityChanged = true;
     }
 
@@ -415,6 +420,7 @@ public abstract class GlowEntity implements Entity {
         metadata.resetChanges();
         teleported = false;
         velocityChanged = false;
+        velocity.zero();
         vehicleChanged = false;
     }
 
@@ -668,9 +674,41 @@ public abstract class GlowEntity implements Entity {
         return boundingBox != null && boundingBox.intersects(box);
     }
 
+    /**
+     * Velocity reduction applied each tick.
+     */
+    private static final double AIR_DRAG = 0.99;
+
+    /**
+     * Velocity reduction applied each tick.
+     */
+    private static final double LIQUID_DRAG = 0.8;
+
+    /**
+     * Gravity acceleration applied each tick.
+     */
+    private static final Vector GRAVITY = new Vector(0, -0.3, 0);
+
+    protected Vector gravity() {
+        return GRAVITY;
+    }
+
     protected void pulsePhysics() {
-        // todo: update location based on velocity,
-        // do gravity, all that other good stuff
+        Location loc = getLocation();
+
+        GlowBlock bottom = (GlowBlock) loc.clone().add(gravity()).getBlock();
+
+        if (!bottom.getType().isSolid()) {
+            loc.add(gravity());
+        }
+
+        loc.add(getVelocity());
+
+        if (loc.getBlock().getType().isSolid()) {
+            loc.add(0, 0.2, 0);
+        }
+
+        setRawLocation(loc, false);
 
         // make sure bounding box is up to date
         if (boundingBox != null) {

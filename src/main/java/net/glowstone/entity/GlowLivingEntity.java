@@ -15,6 +15,7 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
 import org.bukkit.entity.*;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
@@ -36,6 +37,11 @@ import java.util.stream.Collectors;
  * @author Graham Edgecombe.
  */
 public abstract class GlowLivingEntity extends GlowEntity implements LivingEntity {
+
+    /**
+     * Gravity acceleration applied each tick.
+     */
+    private static final Vector GRAVITY = new Vector(0, -9.81, 0); // lol :D
 
     /**
      * Potion effects on the entity.
@@ -677,6 +683,72 @@ public abstract class GlowLivingEntity extends GlowEntity implements LivingEntit
             damage(ev.getDamage());
         }
         setFallDistance(0);
+    }
+
+    @Override
+    protected void pulsePhysics() {
+        /*// simple temporary gravity - should eventually be improved to be real
+        // physics and moved up to GlowEntity
+        if (location.getBlock().getType().isSolid()) {
+            setRawLocation(location.clone(), false);
+        }
+
+        Vector velocity = getVelocity();
+        velocity.add(GRAVITY);
+
+        Block block = getEyeLocation().getBlock();
+        if (block.getType().isOccluding()) {
+            double dis = 0;
+            BlockFace face = null;
+            if (!block.getRelative(BlockFace.EAST).getType().isOccluding()) {
+                face = BlockFace.EAST;
+                dis = location.getX() % 1;
+            }
+
+            if (!block.getRelative(BlockFace.NORTH).getType().isOccluding()) {
+
+            }
+        }
+
+        //for (Entity near : getNearbyEntities(0.5, 0.5, 0.5)) {
+        //    velocity = velocity.crossProduct(near.getLocation().toVector());
+        //}
+
+        if (!location.clone().add(velocity).getBlock().getType().isSolid()) {
+            location.add(velocity);
+        }
+*/
+        super.pulsePhysics();
+    }
+
+    /*
+    NORTH(0, 0, -1),
+    EAST(1, 0, 0),
+    SOUTH(0, 0, 1),
+    WEST(-1, 0, 0),
+     */
+
+    public static BlockFace[] getNearFaces(Location location) {
+        double north = location.getZ() % 1;
+        double east = location.getX() % 1;
+
+        double south = 1 - north;
+        double west = 1 - east;
+
+        if (north < south) {
+            // NORTH SOUTH
+            if (east < west) {
+                return new BlockFace[]{BlockFace.NORTH, BlockFace.EAST, BlockFace.SOUTH, BlockFace.WEST};
+            } else {
+                return new BlockFace[]{BlockFace.NORTH, BlockFace.WEST, BlockFace.SOUTH, BlockFace.EAST};
+            }
+        } else {
+            if (east < west) {
+                return new BlockFace[]{BlockFace.SOUTH, BlockFace.EAST, BlockFace.NORTH, BlockFace.WEST};
+            } else {
+                return new BlockFace[]{BlockFace.SOUTH, BlockFace.WEST, BlockFace.NORTH, BlockFace.EAST};
+            }
+        }
     }
 
     ////////////////////////////////////////////////////////////////////////////

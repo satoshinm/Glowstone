@@ -9,6 +9,7 @@ import net.glowstone.block.blocktype.BlockRedstoneTorch;
 import net.glowstone.block.blocktype.BlockType;
 import net.glowstone.block.entity.TileEntity;
 import net.glowstone.entity.GlowPlayer;
+import net.glowstone.entity.physics.BoundingBox;
 import net.glowstone.net.message.play.game.BlockChangeMessage;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -25,6 +26,8 @@ import org.bukkit.metadata.MetadataStore;
 import org.bukkit.metadata.MetadataStoreBase;
 import org.bukkit.metadata.MetadataValue;
 import org.bukkit.plugin.Plugin;
+import org.bukkit.util.*;
+import org.bukkit.util.Vector;
 
 import java.util.*;
 
@@ -109,6 +112,10 @@ public final class GlowBlock implements Block {
 
     public TileEntity getTileEntity() {
         return ((GlowChunk) world.getChunkAt(this)).getEntity(x & 0xf, y, z & 0xf);
+    }
+
+    public BoundingBox getBoundingBox() {
+        return BoundingBox.fromCorners(new Vector(x, y, z), new Vector(x + 1, y + 1, z + 1));
     }
 
     @Override

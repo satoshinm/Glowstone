@@ -5,7 +5,7 @@ import org.bukkit.Location;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Monster;
 
-public class GlowMonster extends GlowCreature implements Monster {
+public class GlowMonster<T extends GlowCreature> extends GlowCreature<T> implements Monster {
     /**
      * Creates a new non-passive mob.
      *

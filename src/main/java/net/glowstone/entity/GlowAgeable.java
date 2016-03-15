@@ -19,7 +19,7 @@ import java.util.List;
 /**
  * Represents a creature that ages, such as a sheep.
  */
-public class GlowAgeable extends GlowCreature implements Ageable {
+public class GlowAgeable<E extends GlowAgeable> extends GlowCreature<E> implements Ageable {
 
     private static final int AGE_BABY = -24000;
     private static final int AGE_ADULT = 0;

@@ -7,6 +7,7 @@ import net.glowstone.entity.objects.GlowFallingBlock;
 import net.glowstone.entity.objects.GlowItem;
 import net.glowstone.entity.objects.GlowItemFrame;
 import net.glowstone.entity.passive.*;
+import net.glowstone.entity.passive.horse.*;
 import org.bukkit.entity.EntityType;
 
 import static org.bukkit.entity.EntityType.*;
@@ -40,7 +41,12 @@ public class EntityRegistry {
                     .put(GHAST, GlowGhast.class)
                     .put(GIANT, GlowGiant.class)
                     .put(GUARDIAN, GlowGuardian.class)
+                    .put(ELDER_GUARDIAN, GlowElderGuardian.class)
                     .put(HORSE, GlowHorse.class)
+                    .put(ZOMBIE_HORSE, GlowZombieHorse.class)
+                    .put(SKELETON_HORSE, GlowSkeletonHorse.class)
+                    .put(DONKEY, GlowDonkey.class)
+                    .put(MULE, GlowMule.class)
                     .put(IRON_GOLEM, GlowIronGolem.class)
                     .put(ITEM_FRAME, GlowItemFrame.class)
                     //TODO: Leash hitch
@@ -59,6 +65,8 @@ public class EntityRegistry {
                     .put(SHEEP, GlowSheep.class)
                     .put(SILVERFISH, GlowSilverfish.class)
                     .put(SKELETON, GlowSkeleton.class)
+                    .put(WITHER_SKELETON, GlowWitherSkeleton.class)
+                    .put(STRAY, GlowStray.class)
                     .put(SLIME, GlowSlime.class)
                     //TODO: Fireball
                     //TODO: Snowball

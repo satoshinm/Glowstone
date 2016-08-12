@@ -1,19 +1,13 @@
 package net.glowstone.entity.monster;
 
-import com.flowpowered.network.Message;
 import net.glowstone.entity.meta.MetadataIndex;
 import org.bukkit.Location;
 import org.bukkit.entity.EntityType;
-import org.bukkit.entity.Villager.Profession;
 import org.bukkit.entity.Zombie;
-
-import java.util.List;
 
 public class GlowZombie extends GlowMonster implements Zombie {
 
-    private int conversionTime = -1;
     private boolean canBreakDoors;
-    private Profession villagerProfession = Profession.FARMER;
 
     public GlowZombie(Location loc) {
         this(loc, EntityType.ZOMBIE);
@@ -24,12 +18,6 @@ public class GlowZombie extends GlowMonster implements Zombie {
     }
 
     @Override
-    public List<Message> createSpawnMessage() {
-        metadata.set(MetadataIndex.ZOMBIE_IS_CONVERTING, conversionTime > 0);
-        return super.createSpawnMessage();
-    }
-
-    @Override
     public boolean isBaby() {
         return metadata.getBoolean(MetadataIndex.ZOMBIE_IS_CHILD);
     }
@@ -37,36 +25,6 @@ public class GlowZombie extends GlowMonster implements Zombie {
     @Override
     public void setBaby(boolean value) {
         metadata.set(MetadataIndex.ZOMBIE_IS_CHILD, value);
-    }
-
-    @Override
-    public boolean isVillager() {
-        return !villagerProfession.isZombie();
-    }
-
-    @Override
-    public void setVillager(boolean value) {
-        metadata.set(MetadataIndex.ZOMBIE_IS_VILLAGER, value ? villagerProfession.ordinal() + 1 : 0);
-    }
-
-    @Override
-    public void setVillagerProfession(Profession profession) {
-        this.villagerProfession = profession;
-        metadata.set(MetadataIndex.ZOMBIE_IS_VILLAGER, profession.ordinal() + 1);
-    }
-
-    @Override
-    public Profession getVillagerProfession() {
-        return villagerProfession;
-    }
-
-    public int getConversionTime() {
-        return conversionTime;
-    }
-
-    public void setConversionTime(int conversionTime) {
-        this.conversionTime = conversionTime;
-        metadata.set(MetadataIndex.ZOMBIE_IS_CONVERTING, conversionTime > 0);
     }
 
     public boolean isCanBreakDoors() {

@@ -1,6 +1,6 @@
 package net.glowstone.inventory;
 
-import org.bukkit.entity.Horse;
+import org.bukkit.entity.BaseHorse;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.HorseInventory;
 import org.bukkit.inventory.ItemStack;
@@ -13,15 +13,15 @@ public class GlowHorseInventory extends GlowInventory implements HorseInventory 
     private ItemStack saddle;
     private ItemStack armor;
 
-    public GlowHorseInventory(Horse owner) {
-        this(owner, owner.isCarryingChest() ? 16 : 2);
+    public GlowHorseInventory(BaseHorse owner) {
+        this(owner, owner instanceof BaseHorse.ChestedHorse && ((BaseHorse.ChestedHorse) owner).isCarryingChest() ? 16 : 2);
     }
 
-    public GlowHorseInventory(Horse owner, int size) {
+    public GlowHorseInventory(BaseHorse owner, int size) {
         this(owner, size, "EntityHorse");
     }
 
-    public GlowHorseInventory(Horse owner, int size, String title) {
+    public GlowHorseInventory(BaseHorse owner, int size, String title) {
         super(owner, InventoryType.CHEST, size, title); //TODO fix this.
     }
 

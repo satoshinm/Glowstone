@@ -7,10 +7,15 @@ import net.glowstone.entity.passive.GlowCow;
 import net.glowstone.entity.passive.GlowMooshroom;
 import net.glowstone.entity.passive.GlowPolarBear;
 import net.glowstone.entity.passive.GlowSquid;
+import net.glowstone.entity.passive.horse.GlowDonkey;
+import net.glowstone.entity.passive.horse.GlowMule;
+import net.glowstone.entity.passive.horse.GlowSkeletonHorse;
+import net.glowstone.entity.passive.horse.GlowZombieHorse;
 import net.glowstone.io.nbt.NbtSerialization;
 import net.glowstone.util.nbt.CompoundTag;
 import org.bukkit.Location;
 import org.bukkit.World;
+import org.bukkit.entity.EntityType;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -41,37 +46,44 @@ public final class EntityStorage {
         // LivingEntities - Passive Entities
         bind(new BatStore());
         bind(new ChickenStore());
+        bind(new BaseHorseStore(GlowZombieHorse.class, EntityType.ZOMBIE_HORSE));
+        bind(new BaseHorseStore(GlowSkeletonHorse.class, EntityType.SKELETON_HORSE));
         bind(new HorseStore());
+        bind(new ChestedHorseStore(GlowMule.class, EntityType.MULE));
+        bind(new ChestedHorseStore(GlowDonkey.class, EntityType.DONKEY));
         bind(new PigStore());
         bind(new RabbitStore());
         bind(new SheepStore());
         bind(new OcelotStore());
         bind(new WolfStore());
         bind(new VillagerStore());
-        bind(new AgeableStore<>(GlowCow.class, "Cow"));
-        bind(new AgeableStore<>(GlowMooshroom.class, "MushroomCow"));
-        bind(new WaterMobStore<>(GlowSquid.class, "Squid"));
-        bind(new AgeableStore<>(GlowPolarBear.class, "PolarBear"));
+        bind(new AgeableStore<>(GlowCow.class, EntityType.COW.getId()));
+        bind(new AgeableStore<>(GlowMooshroom.class, EntityType.MUSHROOM_COW.getId()));
+        bind(new WaterMobStore<>(GlowSquid.class, EntityType.SQUID.getId()));
+        bind(new AgeableStore<>(GlowPolarBear.class, EntityType.POLAR_BEAR.getId()));
 
         // LivingEntities - Hostile Entities
         bind(new CreeperStore());
         bind(new EndermanStore());
         bind(new EndermiteStore());
         bind(new GhastStore());
-        bind(new GuardianStore());
         bind(new IronGolemStore());
-        bind(new SlimeStore(GlowSlime.class, "Slime"));
-        bind(new SlimeStore(GlowMagmaCube.class, "LavaSlime"));
+        bind(new SlimeStore(GlowSlime.class, EntityType.SLIME.getId()));
+        bind(new SlimeStore(GlowMagmaCube.class, EntityType.MAGMA_CUBE.getId()));
         bind(new ZombieStore<>());
         bind(new PigZombieStore());
-        bind(new SkeletonStore());
-        bind(new MonsterStore<>(GlowBlaze.class, "Blaze"));
-        bind(new MonsterStore<>(GlowCaveSpider.class, "CaveSpider"));
-        bind(new MonsterStore<>(GlowSpider.class, "Spider"));
-        bind(new MonsterStore<>(GlowSnowman.class, "Snowman"));
-        bind(new MonsterStore<>(GlowGiant.class, "Giant"));
-        bind(new MonsterStore<>(GlowSilverfish.class, "Silverfish"));
-        bind(new MonsterStore<>(GlowWitch.class, "Witch"));
+        bind(new MonsterStore<>(GlowWitherSkeleton.class, EntityType.WITHER_SKELETON.getId()));
+        bind(new MonsterStore<>(GlowStray.class, EntityType.STRAY.getId()));
+        bind(new MonsterStore<>(GlowSkeleton.class, EntityType.SKELETON.getId()));
+        bind(new MonsterStore<>(GlowGuardian.class, EntityType.GUARDIAN.getId()));
+        bind(new MonsterStore<>(GlowElderGuardian.class, EntityType.ELDER_GUARDIAN.getId()));
+        bind(new MonsterStore<>(GlowBlaze.class, EntityType.BLAZE.getId()));
+        bind(new MonsterStore<>(GlowCaveSpider.class, EntityType.CAVE_SPIDER.getId()));
+        bind(new MonsterStore<>(GlowSpider.class, EntityType.SPIDER.getId()));
+        bind(new MonsterStore<>(GlowSnowman.class, EntityType.SNOWMAN.getId()));
+        bind(new MonsterStore<>(GlowGiant.class, EntityType.GIANT.getId()));
+        bind(new MonsterStore<>(GlowSilverfish.class, EntityType.SILVERFISH.getId()));
+        bind(new MonsterStore<>(GlowWitch.class, EntityType.WITCH.getId()));
 
 
         bind(new ArmorStandStore());

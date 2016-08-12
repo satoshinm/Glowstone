@@ -3,11 +3,12 @@ package net.glowstone.io.entity;
 import net.glowstone.entity.passive.GlowWolf;
 import net.glowstone.util.nbt.CompoundTag;
 import org.bukkit.DyeColor;
+import org.bukkit.entity.EntityType;
 
 class WolfStore extends TameableStore<GlowWolf> {
 
     public WolfStore() {
-        super(GlowWolf.class, "Wolf");
+        super(GlowWolf.class, EntityType.WOLF.getId());
     }
 
     @Override

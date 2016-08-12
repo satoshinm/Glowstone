@@ -66,11 +66,13 @@ public enum MetadataIndex {
 
     AGE_ISBABY(12, BOOLEAN, Ageable.class),
 
-    HORSE_FLAGS(13, BYTE, Horse.class),
-    HORSE_TYPE(14, INT, Horse.class),
-    HORSE_STYLE(15, INT, Horse.class),
-    HORSE_OWNER(16, OPTUUID, Horse.class),
-    HORSE_ARMOR(17, INT, Horse.class),
+    BASE_HORSE_FLAGS(13, BYTE, BaseHorse.class),
+    BASE_HORSE_OWNER(14, OPTUUID, BaseHorse.class),
+
+    HORSE_STYLE(15, INT, BaseHorse.Horse.class),
+    HORSE_ARMOR(16, INT, BaseHorse.Horse.class),
+
+    CHESTED_HORSE_HAS_CHEST(15, BOOLEAN, BaseHorse.ChestedHorse.class),
 
     PIG_SADDLE(13, BOOLEAN, Pig.class),
 
@@ -103,11 +105,10 @@ public enum MetadataIndex {
     CREEPER_POWERED(13, BOOLEAN, Creeper.class),
     CREEPER_IGNITED(14, BOOLEAN, Creeper.class),
 
-    GUARDIAN_FLAGS(12, BYTE, Guardian.class),
+    GUARDIAN_SPIKES(12, BOOLEAN, Guardian.class),
     GUARDIAN_TARGET(13, INT, Guardian.class),
 
-    SKELETON_TYPE(12, INT, Skeleton.class),
-    SKELETON_UNKNOWN(13, BOOLEAN, Skeleton.class), //TODO 1.9 - Something hand related according to wiki.vg
+    SKELETON_ARMS_SWING(12, BOOLEAN, Skeleton.class),
 
     SPIDER_CLIMBING(12, BYTE, Spider.class),
 
@@ -119,9 +120,11 @@ public enum MetadataIndex {
     WITHER_INVULN_TIME(15, INT, Wither.class),
 
     ZOMBIE_IS_CHILD(12, BOOLEAN, Zombie.class),
-    ZOMBIE_IS_VILLAGER(13, INT, Zombie.class),
-    ZOMBIE_IS_CONVERTING(14, BOOLEAN, Zombie.class),
-    ZOMBIE_HANDS_RISED_UP(15, BOOLEAN, Zombie.class),
+    ZOMBIE_TYPE(13, INT, Zombie.class),
+    ZOMBIE_HANDS_RISED_UP(14, BOOLEAN, Zombie.class),
+
+    ZOMBIE_VILLAGER_IS_CONVERTING(15, BOOLEAN, Zombie.ZombieVillager.class),
+    ZOMBIE_VILLAGER_PROFESSION(16, INT, Zombie.ZombieVillager.class),
 
     ENDERMAN_BLOCK(12, BLOCKID, Enderman.class),
     ENDERMAN_SCREAMING(13, BOOLEAN, Enderman.class),

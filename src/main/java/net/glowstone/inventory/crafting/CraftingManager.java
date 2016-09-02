@@ -368,6 +368,16 @@ public final class CraftingManager implements Iterable<Recipe> {
         furnaceFuels.put(Material.WOOD_SPADE, 200);
         furnaceFuels.put(Material.WOOD_SWORD, 200);
         furnaceFuels.put(Material.WOOD_STEP, 150);
+        furnaceFuels.put(Material.LADDER, 300);
+        furnaceFuels.put(Material.WOOL, 100);
+        furnaceFuels.put(Material.CARPET, 67);
+        furnaceFuels.put(Material.WOOD_BUTTON, 100);
+        furnaceFuels.put(Material.BOW, 300);
+        furnaceFuels.put(Material.FISHING_ROD, 300);
+        furnaceFuels.put(Material.SIGN, 200);
+        furnaceFuels.put(Material.BOWL, 100);
+        furnaceFuels.put(Material.WOOD_DOOR, 200);
+        furnaceFuels.put(Material.BOAT, 400);
     }
 
     /**

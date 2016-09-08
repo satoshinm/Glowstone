@@ -71,6 +71,8 @@ public final class EntityStorage {
         bind(new SlimeStore(GlowSlime.class, EntityType.SLIME.getId()));
         bind(new SlimeStore(GlowMagmaCube.class, EntityType.MAGMA_CUBE.getId()));
         bind(new ZombieStore<>());
+        bind(new ZombieStore<>(GlowHusk.class, EntityType.HUSK.getId()));
+        bind(new ZombieVillagerStore<>());
         bind(new PigZombieStore());
         bind(new MonsterStore<>(GlowWitherSkeleton.class, EntityType.WITHER_SKELETON.getId()));
         bind(new MonsterStore<>(GlowStray.class, EntityType.STRAY.getId()));

@@ -82,6 +82,8 @@ public class EntityRegistry {
                     //TODO: Wither Skull
                     .put(WOLF, GlowWolf.class)
                     .put(ZOMBIE, GlowZombie.class)
+                    .put(HUSK, GlowHusk.class)
+                    .put(ZOMBIE_VILLAGER, GlowZombieVillager.class)
                     .build();
 
     public static Class<? extends GlowEntity> getEntity(short id) {

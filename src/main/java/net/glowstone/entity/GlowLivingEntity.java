@@ -8,6 +8,7 @@ import net.glowstone.block.ItemTable;
 import net.glowstone.block.blocktype.BlockType;
 import net.glowstone.constants.GlowPotionEffect;
 import net.glowstone.entity.AttributeManager.Key;
+import net.glowstone.entity.ai.task.EntityTask;
 import net.glowstone.entity.meta.MetadataIndex;
 import net.glowstone.inventory.EquipmentMonitor;
 import net.glowstone.net.message.play.entity.EntityEffectMessage;
@@ -103,6 +104,8 @@ public abstract class GlowLivingEntity extends GlowEntity implements LivingEntit
      */
     private boolean fallFlying;
 
+    public ArrayList<EntityTask> tasks;
+
     /**
      * Creates a mob within the specified world.
      *
@@ -124,6 +127,7 @@ public abstract class GlowLivingEntity extends GlowEntity implements LivingEntit
         this.maxHealth = maxHealth;
         attributeManager.setProperty(Key.KEY_MAX_HEALTH, maxHealth);
         health = maxHealth;
+        this.tasks = new ArrayList<>();
     }
 
     ////////////////////////////////////////////////////////////////////////////
@@ -192,6 +196,9 @@ public abstract class GlowLivingEntity extends GlowEntity implements LivingEntit
         BlockType type = ItemTable.instance().getBlock(under.getType());
         if (type != null) {
             type.onEntityStep(under, this);
+        }
+        for (EntityTask task : tasks) {
+            task.pulse();
         }
     }
 

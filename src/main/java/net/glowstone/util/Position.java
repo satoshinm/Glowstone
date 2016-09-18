@@ -35,6 +35,10 @@ public final class Position {
         return (int) (loc.getYaw() % 360 / 360 * 256);
     }
 
+    public static int getIntHeadYaw(float headYaw) {
+        return (int) (headYaw % 360 / 360 * 256);
+    }
+
     /**
      * Gets an integer approximation of the pitch between 0 and 255.
      *

@@ -74,6 +74,11 @@ public abstract class GlowEntity implements Entity {
      * The position in the last cycle.
      */
     protected final Location previousLocation;
+
+    protected float headYaw;
+
+    protected boolean headRotated = false;
+
     /**
      * The entity's velocity, applied each tick.
      */
@@ -161,6 +166,8 @@ public abstract class GlowEntity implements Entity {
         server.getEntityIdManager().allocate(this);
         world.getEntityManager().register(this);
         previousLocation = location.clone();
+        headYaw = 0.0F;
+        headRotated = true;
     }
 
     @Override
@@ -277,6 +284,15 @@ public abstract class GlowEntity implements Entity {
         } else {
             return BlockFace.EAST;
         }
+    }
+
+    public float getHeadYaw() {
+        return headYaw;
+    }
+
+    public void setHeadYaw(float headYaw) {
+        headRotated = true;
+        this.headYaw = headYaw;
     }
 
     /**
@@ -539,8 +555,9 @@ public abstract class GlowEntity implements Entity {
         }
 
         // todo: handle head rotation as a separate value
-        if (rotated) {
-            result.add(new EntityHeadRotationMessage(id, yaw));
+        if (headRotated) {
+            result.add(new EntityHeadRotationMessage(id, Position.getIntHeadYaw(headYaw)));
+            headRotated = false;
         }
 
         // send changed metadata

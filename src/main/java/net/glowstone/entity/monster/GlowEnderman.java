@@ -1,5 +1,9 @@
 package net.glowstone.entity.monster;
 
+import net.glowstone.entity.ai.task.AttackNearTask;
+import net.glowstone.entity.ai.task.LookAtNearbyTask;
+import net.glowstone.entity.ai.task.PathfindTargetTask;
+import net.glowstone.entity.ai.task.StareAgressiveTask;
 import net.glowstone.entity.meta.MetadataIndex;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -15,6 +19,10 @@ public class GlowEnderman extends GlowMonster implements Enderman {
     public GlowEnderman(Location loc) {
         super(loc, EntityType.ENDERMAN, 40);
         setBoundingBox(0.6, 2.9);
+        this.tasks.add(new LookAtNearbyTask(this));
+        this.tasks.add(new StareAgressiveTask(this));
+        this.tasks.add(new PathfindTargetTask(this, 4));
+        this.tasks.add(new AttackNearTask(this));
     }
 
     @Override
@@ -44,5 +52,10 @@ public class GlowEnderman extends GlowMonster implements Enderman {
     @Override
     protected Sound getDeathSound() {
         return Sound.ENTITY_ENDERMEN_DEATH;
+    }
+
+    @Override
+    public double getEyeHeight() {
+        return 2.7;
     }
 }

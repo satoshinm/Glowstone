@@ -3,6 +3,7 @@ package net.glowstone.entity.monster;
 import com.flowpowered.network.Message;
 import net.glowstone.entity.ai.task.AttackNearTask;
 import net.glowstone.entity.ai.task.FindTargetTask;
+import net.glowstone.entity.ai.task.LookAtNearbyTask;
 import net.glowstone.entity.ai.task.PathfindTargetTask;
 import net.glowstone.entity.meta.MetadataIndex;
 import net.glowstone.util.SoundUtil;
@@ -28,8 +29,9 @@ public class GlowZombie extends GlowMonster implements Zombie {
         super(loc, type, 20);
         setBoundingBox(0.6, 1.8);
         tasks.add(new FindTargetTask(this));
-        tasks.add(new PathfindTargetTask(this));
+        tasks.add(new PathfindTargetTask(this, 16));
         tasks.add(new AttackNearTask(this));
+        tasks.add(new LookAtNearbyTask(this));
     }
 
     @Override

@@ -15,12 +15,14 @@ import java.util.Collection;
 public abstract class PathfindTask extends EntityTask {
 
     protected Location target;
+    private final double speed;
     private NavigationPath path;
     private AIBoundingBox box;
 
-    public PathfindTask(GlowLivingEntity entity, Location target) {
+    public PathfindTask(GlowLivingEntity entity, Location target, double speed) {
         super(entity);
         this.target = target;
+        this.speed = speed;
         path = createPath();
     }
 
@@ -34,7 +36,7 @@ public abstract class PathfindTask extends EntityTask {
         if (pathNodes == null) {
             return;
         }
-        lookAtTarget();
+        rotateTowardsTarget();
         for (PathNode pathNode : pathNodes) {
             IntVector point = pathNode.getPoint();
             Location location = box.getCorner().clone().add(point.x + 0.5, point.z + 0.25, point.y + 0.5);
@@ -50,8 +52,8 @@ public abstract class PathfindTask extends EntityTask {
 
     public void walkTorwards(Location location) {
         Location current = entity.getLocation().clone();
-        double deltaX = (location.getX() - current.getX()) / 16;
-        double deltaZ = (location.getZ() - current.getZ()) / 16;
+        double deltaX = (location.getX() - current.getX()) / speed;
+        double deltaZ = (location.getZ() - current.getZ()) / speed;
         current.add(deltaX, 0, deltaZ);
         if (current.getBlock().getType().isSolid()) {
             current.add(0, 1, 0);
@@ -61,11 +63,10 @@ public abstract class PathfindTask extends EntityTask {
         entity.teleport(current);
     }
 
-    protected void lookAtTarget() {
+    protected void rotateTowardsTarget() {
         double x = target.getX() - entity.getLocation().getX();
         double z = target.getZ() - entity.getLocation().getZ();
         float yaw = (float) (Math.atan2(z, x) * (180 / Math.PI)) - 90;
-        entity.setHeadYaw(yaw);
         Location current = entity.getLocation().clone();
         current.setYaw(yaw);
         entity.teleport(current);

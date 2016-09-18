@@ -2,6 +2,7 @@ package net.glowstone.entity.passive;
 
 import net.glowstone.entity.GlowAnimal;
 import net.glowstone.entity.GlowPlayer;
+import net.glowstone.entity.ai.task.LookAtNearbyTask;
 import net.glowstone.entity.objects.GlowItem;
 import net.glowstone.net.message.play.player.InteractEntityMessage;
 import org.bukkit.GameMode;
@@ -17,6 +18,7 @@ public class GlowCow extends GlowAnimal implements Cow {
     public GlowCow(Location location) {
         super(location, EntityType.COW, 10);
         setSize(0.9F, 1.3F);
+        this.tasks.add(new LookAtNearbyTask(this));
     }
 
     @Override

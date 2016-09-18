@@ -45,6 +45,7 @@ public class AIBoundingBox extends BoundingBox {
         Location corner = getCorner();
         for (int x = 0; x < getSize().getBlockX(); x++) {
             for (int z = 0; z < getSize().getBlockZ(); z++) {
+                //TODO: Factor-in roofs (air under blocks)
                 int y = corner.getWorld().getHighestBlockYAt(corner.getBlockX() + x, corner.getBlockZ() + z);
                 map.add(new IntVector(x, z, y - start.getBlockY() + getSize().getBlockY() / 2));
             }

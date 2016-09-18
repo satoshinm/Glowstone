@@ -5,8 +5,8 @@ import net.glowstone.entity.GlowLivingEntity;
 public class PathfindEntityTask extends PathfindTask {
     protected GlowLivingEntity other;
 
-    public PathfindEntityTask(GlowLivingEntity entity, GlowLivingEntity other) {
-        super(entity, other == null ? null : other.getLocation().clone());
+    public PathfindEntityTask(GlowLivingEntity entity, GlowLivingEntity other, double speed) {
+        super(entity, other == null ? null : other.getLocation().clone(), speed);
         this.other = other;
     }
 

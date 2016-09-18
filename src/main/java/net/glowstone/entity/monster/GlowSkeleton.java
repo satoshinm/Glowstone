@@ -1,5 +1,7 @@
 package net.glowstone.entity.monster;
 
+import net.glowstone.entity.ai.task.FindTargetTask;
+import net.glowstone.entity.ai.task.PathfindTargetTask;
 import net.glowstone.entity.meta.MetadataIndex;
 import org.bukkit.Location;
 import org.bukkit.Sound;
@@ -12,6 +14,8 @@ public class GlowSkeleton extends GlowMonster implements Skeleton {
     public GlowSkeleton(Location loc) {
         super(loc, EntityType.SKELETON, 20);
         setBoundingBox(0.6, 1.99);
+        this.tasks.add(new FindTargetTask(this));
+        this.tasks.add(new PathfindTargetTask(this, 16));
     }
 
     @Override

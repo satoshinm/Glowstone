@@ -26,6 +26,8 @@ public final class GameRuleManager {
         setValue("reducedDebugInfo", false); // implemented
         setValue("sendCommandFeedback", true);
         setValue("showDeathMessages", true);
+        setValue("doWeatherCycle", true);
+        setValue("maxEntityCramming", 24);
     }
 
     /**

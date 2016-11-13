@@ -330,7 +330,7 @@ public final class GlowPlayer extends GlowHumanEntity implements Player {
 
         // send login response
         session.send(new LoginSuccessMessage(profile.getUniqueId().toString(), profile.getName()));
-        session.setProtocol(ProtocolType.PLAY);
+        session.setProtocol(session.isCompatible() ? ProtocolType.PLAY_COMPATIBLE : ProtocolType.PLAY);
 
         // read data from player reader
         hasPlayedBefore = reader.hasPlayedBefore();

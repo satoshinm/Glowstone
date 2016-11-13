@@ -139,6 +139,8 @@ public final class GlowSession extends BasicSession {
      */
     private boolean compresssionSent;
 
+    private boolean compatible;
+
     /**
      * Creates a new session.
      *
@@ -283,6 +285,14 @@ public final class GlowSession extends BasicSession {
     @Override
     public InetSocketAddress getAddress() {
         return address;
+    }
+
+    public boolean isCompatible() {
+        return compatible;
+    }
+
+    public void setCompatible(boolean compatible) {
+        this.compatible = compatible;
     }
 
     ////////////////////////////////////////////////////////////////////////////

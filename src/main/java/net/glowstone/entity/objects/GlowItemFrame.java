@@ -5,6 +5,7 @@ import net.glowstone.GlowChunk.Key;
 import net.glowstone.entity.GlowEntity;
 import net.glowstone.entity.GlowPlayer;
 import net.glowstone.entity.meta.MetadataIndex;
+import net.glowstone.net.GlowSession;
 import net.glowstone.net.message.play.entity.EntityMetadataMessage;
 import net.glowstone.net.message.play.entity.EntityTeleportMessage;
 import net.glowstone.net.message.play.entity.SpawnObjectMessage;
@@ -164,7 +165,7 @@ public final class GlowItemFrame extends GlowEntity implements ItemFrame {
     }
 
     @Override
-    public List<Message> createSpawnMessage() {
+    public List<Message> createSpawnMessage(GlowSession target) {
         int yaw = 0;
         switch (getFacingNumber(face)) {
             case 1:
@@ -180,7 +181,7 @@ public final class GlowItemFrame extends GlowEntity implements ItemFrame {
                 yaw = 0;
                 break;
         }
-        return Arrays.asList(new SpawnObjectMessage(id, getUniqueId(), 71, location.getBlockX(), location.getBlockY(), location.getBlockZ(), 0, yaw, getFacingNumber(face), 0, 0, 0), new EntityMetadataMessage(id, metadata.getEntryList()));
+        return Arrays.asList(new SpawnObjectMessage(id, getUniqueId(), 71, location.getBlockX(), location.getBlockY(), location.getBlockZ(), 0, yaw, getFacingNumber(face), 0, 0, 0), new EntityMetadataMessage(target.isCompatible(), id, metadata.getEntryList()));
     }
 
     @Override

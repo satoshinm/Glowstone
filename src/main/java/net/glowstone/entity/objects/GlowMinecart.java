@@ -4,6 +4,7 @@ import com.flowpowered.network.Message;
 import net.glowstone.entity.GlowEntity;
 import net.glowstone.entity.GlowPlayer;
 import net.glowstone.inventory.GlowInventory;
+import net.glowstone.net.GlowSession;
 import net.glowstone.net.message.play.entity.SpawnObjectMessage;
 import net.glowstone.net.message.play.player.InteractEntityMessage;
 import net.glowstone.util.Position;
@@ -31,7 +32,7 @@ public abstract class GlowMinecart extends GlowEntity implements Minecart {
     }
 
     @Override
-    public List<Message> createSpawnMessage() {
+    public List<Message> createSpawnMessage(GlowSession target) {
         double x = location.getX();
         double y = location.getY();
         double z = location.getZ();

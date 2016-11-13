@@ -1,9 +1,7 @@
 package net.glowstone.entity.meta;
 
 import com.google.common.collect.ImmutableList;
-import lombok.EqualsAndHashCode;
-import lombok.RequiredArgsConstructor;
-import lombok.ToString;
+import lombok.*;
 import org.bukkit.entity.Entity;
 import org.bukkit.inventory.ItemStack;
 
@@ -139,11 +137,11 @@ public class MetadataMap {
         changes.clear();
     }
 
-    @RequiredArgsConstructor
-    @EqualsAndHashCode
+    @AllArgsConstructor
+    @Data
     public static final class Entry implements Comparable<Entry> {
-        public final MetadataIndex index;
-        public final Object value;
+        public MetadataIndex index;
+        public Object value;
 
         @Override
         public int compareTo(Entry o) {
@@ -153,6 +151,11 @@ public class MetadataMap {
         @Override
         public String toString() {
             return index + "=" + value;
+        }
+
+        @Override
+        public Entry clone() {
+            return new Entry(index, value);
         }
     }
 }

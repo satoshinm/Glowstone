@@ -9,6 +9,7 @@ import java.util.List;
 @Data
 public final class EntityMetadataMessage implements Message {
 
+    private final boolean compatible;
     private final int id;
     private final List<Entry> entries;
 

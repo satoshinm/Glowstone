@@ -1218,8 +1218,10 @@ public final class GlowWorld implements World {
                     spawnEvent = EventFactory.callEvent(new EntitySpawnEvent(entity));
                 }
                 if (!spawnEvent.isCancelled()) {
-                    List<Message> spawnMessage = entity.createSpawnMessage();
-                    getRawPlayers().stream().filter(player -> player.canSeeEntity(impl)).forEach(player -> player.getSession().sendAll(spawnMessage.toArray(new Message[spawnMessage.size()])));
+                    getRawPlayers().stream().filter(player -> player.canSeeEntity(impl)).forEach(player -> {
+                        List<Message> spawnMessage = impl.createSpawnMessage(player.getSession());
+                        player.getSession().sendAll(spawnMessage.toArray(new Message[spawnMessage.size()]));
+                    });
                 } else {
                     // TODO: separate spawning and construction for better event cancellation
                     entity.remove();

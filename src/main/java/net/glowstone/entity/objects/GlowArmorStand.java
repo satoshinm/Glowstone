@@ -8,6 +8,7 @@ import net.glowstone.entity.GlowPlayer;
 import net.glowstone.entity.meta.MetadataIndex;
 import net.glowstone.entity.meta.MetadataIndex.ArmorStandFlags;
 import net.glowstone.entity.meta.MetadataIndex.StatusFlags;
+import net.glowstone.net.GlowSession;
 import net.glowstone.net.message.play.entity.DestroyEntitiesMessage;
 import net.glowstone.net.message.play.entity.EntityEquipmentMessage;
 import net.glowstone.net.message.play.entity.EntityMetadataMessage;
@@ -291,7 +292,7 @@ public class GlowArmorStand extends GlowLivingEntity implements ArmorStand {
     }
 
     @Override
-    public List<Message> createSpawnMessage() {
+    public List<Message> createSpawnMessage(GlowSession target) {
         double x = location.getX();
         double y = location.getY();
         double z = location.getZ();
@@ -301,7 +302,7 @@ public class GlowArmorStand extends GlowLivingEntity implements ArmorStand {
 
         return Arrays.asList(
                 new SpawnObjectMessage(id, UUID.randomUUID(), 78, x, y, z, pitch, yaw), // TODO: once UUID is documented, actually use the appropriate ID here
-                new EntityMetadataMessage(id, metadata.getEntryList()),
+                new EntityMetadataMessage(target.isCompatible(), id, metadata.getEntryList()),
                 new EntityEquipmentMessage(id, EntityEquipmentMessage.HELD_ITEM, getItemInHand()),
                 new EntityEquipmentMessage(id, EntityEquipmentMessage.BOOTS_SLOT, getBoots()),
                 new EntityEquipmentMessage(id, EntityEquipmentMessage.LEGGINGS_SLOT, getLeggings()),
@@ -311,8 +312,8 @@ public class GlowArmorStand extends GlowLivingEntity implements ArmorStand {
     }
 
     @Override
-    public List<Message> createUpdateMessage() {
-        List<Message> messages = super.createUpdateMessage();
+    public List<Message> createUpdateMessage(GlowSession target) {
+        List<Message> messages = super.createUpdateMessage(target);
         for (int i = 0; i < 5; i++) {
             if (changedEquip[i]) {
                 messages.add(new EntityEquipmentMessage(id, i, equipment[i]));

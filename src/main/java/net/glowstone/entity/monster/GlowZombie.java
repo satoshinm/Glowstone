@@ -2,6 +2,7 @@ package net.glowstone.entity.monster;
 
 import com.flowpowered.network.Message;
 import net.glowstone.entity.meta.MetadataIndex;
+import net.glowstone.net.GlowSession;
 import net.glowstone.util.SoundUtil;
 import org.bukkit.Location;
 import org.bukkit.Sound;
@@ -27,9 +28,9 @@ public class GlowZombie extends GlowMonster implements Zombie {
     }
 
     @Override
-    public List<Message> createSpawnMessage() {
+    public List<Message> createSpawnMessage(GlowSession target) {
         metadata.set(MetadataIndex.ZOMBIE_IS_CONVERTING, conversionTime > 0);
-        return super.createSpawnMessage();
+        return super.createSpawnMessage(target);
     }
 
     @Override

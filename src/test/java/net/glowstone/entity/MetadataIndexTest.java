@@ -50,7 +50,11 @@ public class MetadataIndexTest {
             // check for duplication
             // check that class is a parent
             // look for matching index
-            map.entrySet().stream().filter(entry -> entry.getKey().isAssignableFrom(clazz)).filter(entry -> entry.getValue().containsKey(index.getIndex())).forEach(entry -> fail("Index " + index + "(" + clazz.getSimpleName() + ") conflicts with " + entry.getValue().get(index.getIndex()) + "(" + entry.getKey().getSimpleName() + ")"));
+            map.entrySet().stream().filter(entry -> entry.getKey().isAssignableFrom(clazz)).filter(entry -> entry.getValue().containsKey(index.getIndex())).forEach(entry -> {
+                if (!index.name().startsWith("COMPATIBLE_") && !entry.getValue().get(index.getIndex()).name().startsWith("COMPATIBLE_")) {
+                    fail("Index " + index + "(" + clazz.getSimpleName() + ") conflicts with " + entry.getValue().get(index.getIndex()) + "(" + entry.getKey().getSimpleName() + ")");
+                }
+            });
 
             // insert this index
             HashMap<Integer, MetadataIndex> classMap = map.get(index.getAppliesTo());

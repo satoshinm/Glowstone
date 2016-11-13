@@ -3,6 +3,8 @@ package net.glowstone.net.codec.play.entity;
 import com.flowpowered.network.Codec;
 import com.flowpowered.network.util.ByteBufUtils;
 import io.netty.buffer.ByteBuf;
+import net.glowstone.compatible.EntityTypeAdapter;
+import net.glowstone.entity.meta.MetadataMap;
 import net.glowstone.entity.meta.MetadataMap.Entry;
 import net.glowstone.net.GlowBufUtils;
 import net.glowstone.net.message.play.entity.SpawnMobMessage;
@@ -27,7 +29,7 @@ public final class SpawnMobCodec implements Codec<SpawnMobMessage> {
         int velY = buf.readShort();
         int velZ = buf.readShort();
         List<Entry> list = GlowBufUtils.readMetadata(buf);
-        return new SpawnMobMessage(id, uuid, type, x, y, z, rotation, pitch, headPitch, velX, velY, velZ, list);
+        return new SpawnMobMessage(false, id, uuid, type, x, y, z, rotation, pitch, headPitch, velX, velY, velZ, list);
     }
 
     @Override
@@ -44,7 +46,12 @@ public final class SpawnMobCodec implements Codec<SpawnMobMessage> {
         buf.writeShort(message.getVelX());
         buf.writeShort(message.getVelY());
         buf.writeShort(message.getVelZ());
-        GlowBufUtils.writeMetadata(buf, message.getMetadata());
+        if (message.isCompatible()) {
+            List<MetadataMap.Entry> entries = EntityTypeAdapter.adaptMetadataEntries(message.getMetadata());
+            GlowBufUtils.writeMetadata(buf, entries);
+        } else {
+            GlowBufUtils.writeMetadata(buf, message.getMetadata());
+        }
         return buf;
     }
 }

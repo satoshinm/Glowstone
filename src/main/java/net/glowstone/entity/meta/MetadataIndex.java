@@ -146,7 +146,14 @@ public enum MetadataIndex {
     //MINECARTCOMMANDBLOCK_LAST_OUTPUT(12, CHAT, Minecart.class), //TODO 1.9 - Command block minecraft addition
 
     FURNACE_MINECART_POWERED(12, BOOLEAN, PoweredMinecart.class),
-    TNT_PRIMED(6, INT, TNTPrimed.class);
+    TNT_PRIMED(6, INT, TNTPrimed.class),
+
+    COMPATIBLE_SKELETON_HANDS_RISEN_UP(12, BOOLEAN, Skeleton.class),
+    COMPATIBLE_ZOMBIE_HANDS_RISED_UP(14, BOOLEAN, Zombie.class),
+    COMPATIBLE_ZOMBIE_VILLAGER_CONVERTING(15, BOOLEAN, Zombie.class),
+    COMPATIBLE_ZOMBIE_VILLAGER_PROFESSION(16, INT, Zombie.class),
+    COMPATIBLE_GUARDIAN_SPIKES(12, BOOLEAN, Guardian.class),
+    COMPATIBLE_SHULKER_COLOR(15, BYTE, Shulker.class);
 
 
     private final int index;
@@ -178,7 +185,7 @@ public enum MetadataIndex {
         return type;
     }
 
-    public Class<?> getAppliesTo() {
+    public Class<? extends Entity> getAppliesTo() {
         return appliesTo;
     }
 

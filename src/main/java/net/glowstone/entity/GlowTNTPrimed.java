@@ -3,6 +3,7 @@ package net.glowstone.entity;
 import com.flowpowered.network.Message;
 import net.glowstone.EventFactory;
 import net.glowstone.Explosion;
+import net.glowstone.net.GlowSession;
 import net.glowstone.net.message.play.entity.SpawnObjectMessage;
 import net.glowstone.util.Position;
 import org.bukkit.Effect;
@@ -59,7 +60,7 @@ public class GlowTNTPrimed extends GlowExplosive implements TNTPrimed {
     }
 
     @Override
-    public List<Message> createSpawnMessage() {
+    public List<Message> createSpawnMessage(GlowSession target) {
         double x = location.getX();
         double y = location.getY();
         double z = location.getZ();

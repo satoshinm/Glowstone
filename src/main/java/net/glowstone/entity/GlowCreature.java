@@ -1,6 +1,8 @@
 package net.glowstone.entity;
 
 import com.flowpowered.network.Message;
+import net.glowstone.compatible.EntityTypeAdapter;
+import net.glowstone.net.GlowSession;
 import net.glowstone.net.message.play.entity.EntityHeadRotationMessage;
 import net.glowstone.net.message.play.entity.SpawnMobMessage;
 import net.glowstone.util.Position;
@@ -72,7 +74,7 @@ public class GlowCreature extends GlowLivingEntity implements Creature {
     }
 
     @Override
-    public List<Message> createSpawnMessage() {
+    public List<Message> createSpawnMessage(GlowSession target) {
         List<Message> result = new LinkedList<>();
 
         // spawn mob
@@ -81,7 +83,7 @@ public class GlowCreature extends GlowLivingEntity implements Creature {
         double z = location.getZ();
         int yaw = Position.getIntYaw(location);
         int pitch = Position.getIntPitch(location);
-        result.add(new SpawnMobMessage(id, getUniqueId(), type.getTypeId(), x, y, z, yaw, pitch, pitch, 0, 0, 0, metadata.getEntryList()));
+        result.add(new SpawnMobMessage(target.isCompatible(), id, getUniqueId(), target.isCompatible() ? EntityTypeAdapter.getCompatibleType(this) : type.getTypeId(), x, y, z, yaw, pitch, pitch, 0, 0, 0, metadata.getEntryList()));
 
         // head facing
         result.add(new EntityHeadRotationMessage(id, yaw));

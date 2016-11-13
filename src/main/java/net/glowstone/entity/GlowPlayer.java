@@ -582,7 +582,7 @@ public final class GlowPlayer extends GlowHumanEntity implements Player {
         // send changed metadata
         List<MetadataMap.Entry> changes = metadata.getChanges();
         if (!changes.isEmpty()) {
-            session.send(new EntityMetadataMessage(SELF_ID, changes));
+            session.send(new EntityMetadataMessage(session.isCompatible(), SELF_ID, changes));
         }
 
         // update or remove entities
@@ -590,7 +590,7 @@ public final class GlowPlayer extends GlowHumanEntity implements Player {
         for (Iterator<GlowEntity> it = knownEntities.iterator(); it.hasNext(); ) {
             GlowEntity entity = it.next();
             if (isWithinDistance(entity)) {
-                entity.createUpdateMessage().forEach(session::send);
+                entity.createUpdateMessage(session).forEach(session::send);
             } else {
                 destroyIds.add(entity.getEntityId());
                 it.remove();
@@ -605,7 +605,7 @@ public final class GlowPlayer extends GlowHumanEntity implements Player {
             if (entity != this && isWithinDistance(entity) && !entity.isDead() &&
                     !knownEntities.contains(entity) && !hiddenEntities.contains(entity.getUniqueId())) {
                 knownEntities.add(entity);
-                entity.createSpawnMessage().forEach(session::send);
+                entity.createSpawnMessage(session).forEach(session::send);
             }
         }
 
@@ -1013,8 +1013,8 @@ public final class GlowPlayer extends GlowHumanEntity implements Player {
     // Editable properties
 
     @Override
-    public List<Message> createSpawnMessage() {
-        List<Message> result = super.createSpawnMessage();
+    public List<Message> createSpawnMessage(GlowSession target) {
+        List<Message> result = super.createSpawnMessage(target);
         if (bed != null) {
             result.add(new UseBedMessage(getEntityId(), bed.getX(), bed.getY(), bed.getZ()));
         }

@@ -10,6 +10,7 @@ import java.util.UUID;
 @Data
 public final class SpawnMobMessage implements Message {
 
+    private final boolean compatible;
     private final int id;
     private final UUID uuid; //TODO: Handle UUID
     private final int type;

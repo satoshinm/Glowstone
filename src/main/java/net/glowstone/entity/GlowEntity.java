@@ -13,6 +13,7 @@ import net.glowstone.entity.meta.MetadataMap.Entry;
 import net.glowstone.entity.objects.GlowItemFrame;
 import net.glowstone.entity.physics.BoundingBox;
 import net.glowstone.entity.physics.EntityBoundingBox;
+import net.glowstone.net.GlowSession;
 import net.glowstone.net.message.play.entity.*;
 import net.glowstone.net.message.play.player.InteractEntityMessage;
 import net.glowstone.util.Position;
@@ -493,7 +494,7 @@ public abstract class GlowEntity implements Entity {
      *
      * @return A message which can spawn this entity.
      */
-    public abstract List<Message> createSpawnMessage();
+    public abstract List<Message> createSpawnMessage(GlowSession target);
 
     /**
      * Creates a {@link Message} which can be sent to a client to update this
@@ -501,7 +502,7 @@ public abstract class GlowEntity implements Entity {
      *
      * @return A message which can update this entity.
      */
-    public List<Message> createUpdateMessage() {
+    public List<Message> createUpdateMessage(GlowSession target) {
         boolean moved = hasMoved();
         boolean rotated = hasRotated();
 
@@ -541,7 +542,7 @@ public abstract class GlowEntity implements Entity {
         // send changed metadata
         List<Entry> changes = metadata.getChanges();
         if (!changes.isEmpty()) {
-            result.add(new EntityMetadataMessage(id, changes));
+            result.add(new EntityMetadataMessage(target.isCompatible(), id, changes));
         }
 
         // send velocity if needed

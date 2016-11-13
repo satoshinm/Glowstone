@@ -4,6 +4,7 @@ import com.flowpowered.network.Message;
 import net.glowstone.block.GlowBlock;
 import net.glowstone.block.entity.TileEntity;
 import net.glowstone.entity.GlowEntity;
+import net.glowstone.net.GlowSession;
 import net.glowstone.net.message.play.entity.SpawnObjectMessage;
 import net.glowstone.util.Position;
 import net.glowstone.util.nbt.CompoundTag;
@@ -148,7 +149,7 @@ public class GlowFallingBlock extends GlowEntity implements FallingBlock {
     }
 
     @Override
-    public List<Message> createSpawnMessage() {
+    public List<Message> createSpawnMessage(GlowSession target) {
         double x = location.getX();
         double y = location.getY();
         double z = location.getZ();

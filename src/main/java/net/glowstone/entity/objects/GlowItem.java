@@ -5,6 +5,7 @@ import net.glowstone.compatible.CompatibleCollectItemMessage;
 import net.glowstone.entity.GlowEntity;
 import net.glowstone.entity.GlowPlayer;
 import net.glowstone.entity.meta.MetadataIndex;
+import net.glowstone.net.GlowSession;
 import net.glowstone.net.message.play.entity.*;
 import net.glowstone.util.Position;
 import org.bukkit.Location;
@@ -190,7 +191,7 @@ public final class GlowItem extends GlowEntity implements Item {
     }
 
     @Override
-    public List<Message> createSpawnMessage() {
+    public List<Message> createSpawnMessage(GlowSession target) {
         double x = location.getX();
         double y = location.getY();
         double z = location.getZ();
@@ -200,7 +201,7 @@ public final class GlowItem extends GlowEntity implements Item {
 
         return Arrays.asList(
                 new SpawnObjectMessage(id, getUniqueId(), SpawnObjectMessage.ITEM, x, y, z, pitch, yaw),
-                new EntityMetadataMessage(id, metadata.getEntryList()),
+                new EntityMetadataMessage(target.isCompatible(), id, metadata.getEntryList()),
                 // these keep the client from assigning a random velocity
                 new EntityTeleportMessage(id, x, y, z, yaw, pitch),
                 new EntityVelocityMessage(id, getVelocity())

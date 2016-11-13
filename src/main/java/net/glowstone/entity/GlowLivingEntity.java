@@ -10,6 +10,7 @@ import net.glowstone.constants.GlowPotionEffect;
 import net.glowstone.entity.AttributeManager.Key;
 import net.glowstone.entity.meta.MetadataIndex;
 import net.glowstone.inventory.EquipmentMonitor;
+import net.glowstone.net.GlowSession;
 import net.glowstone.net.message.play.entity.EntityEffectMessage;
 import net.glowstone.net.message.play.entity.EntityEquipmentMessage;
 import net.glowstone.net.message.play.entity.EntityRemoveEffectMessage;
@@ -202,8 +203,8 @@ public abstract class GlowLivingEntity extends GlowEntity implements LivingEntit
     }
 
     @Override
-    public List<Message> createUpdateMessage() {
-        List<Message> messages = super.createUpdateMessage();
+    public List<Message> createUpdateMessage(GlowSession target) {
+        List<Message> messages = super.createUpdateMessage(target);
 
         messages.addAll(equipmentMonitor.getChanges().stream().map(change -> new EntityEquipmentMessage(id, change.slot, change.item)).collect(Collectors.toList()));
 

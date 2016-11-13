@@ -2,6 +2,7 @@ package net.glowstone.entity.monster;
 
 import com.flowpowered.network.Message;
 import net.glowstone.entity.meta.MetadataIndex;
+import net.glowstone.net.GlowSession;
 import org.bukkit.Location;
 import org.bukkit.Sound;
 import org.bukkit.entity.Creeper;
@@ -21,9 +22,9 @@ public class GlowCreeper extends GlowMonster implements Creeper {
     }
 
     @Override
-    public List<Message> createSpawnMessage() {
+    public List<Message> createSpawnMessage(GlowSession target) {
         // todo Implement the fuse & Ignition later.
-        return super.createSpawnMessage();
+        return super.createSpawnMessage(target);
     }
 
     @Override

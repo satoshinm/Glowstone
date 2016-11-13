@@ -5,6 +5,7 @@ import net.glowstone.EventFactory;
 import net.glowstone.entity.meta.profile.PlayerProfile;
 import net.glowstone.entity.objects.GlowItem;
 import net.glowstone.inventory.*;
+import net.glowstone.net.GlowSession;
 import net.glowstone.net.message.play.entity.EntityEquipmentMessage;
 import net.glowstone.net.message.play.entity.EntityHeadRotationMessage;
 import net.glowstone.net.message.play.entity.SpawnPlayerMessage;
@@ -111,7 +112,7 @@ public abstract class GlowHumanEntity extends GlowLivingEntity implements HumanE
     // Internals
 
     @Override
-    public List<Message> createSpawnMessage() {
+    public List<Message> createSpawnMessage(GlowSession target) {
         List<Message> result = new LinkedList<>();
 
         // spawn player

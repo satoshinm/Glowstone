@@ -3,6 +3,7 @@ package net.glowstone.entity;
 import com.flowpowered.network.Message;
 import net.glowstone.entity.meta.MetadataIndex;
 import net.glowstone.entity.meta.MetadataMap;
+import net.glowstone.net.GlowSession;
 import net.glowstone.net.message.play.entity.EntityMetadataMessage;
 import net.glowstone.net.message.play.player.InteractEntityMessage;
 import net.glowstone.util.SoundUtil;
@@ -119,11 +120,11 @@ public class GlowAgeable extends GlowCreature implements Ageable {
     }
 
     @Override
-    public List<Message> createSpawnMessage() {
-        List<Message> messages = super.createSpawnMessage();
+    public List<Message> createSpawnMessage(GlowSession target) {
+        List<Message> messages = super.createSpawnMessage(target);
         MetadataMap map = new MetadataMap(GlowAgeable.class);
         map.set(MetadataIndex.AGE_ISBABY, !isAdult());
-        messages.add(new EntityMetadataMessage(id, map.getEntryList()));
+        messages.add(new EntityMetadataMessage(target.isCompatible(), id, map.getEntryList()));
         return messages;
     }
 

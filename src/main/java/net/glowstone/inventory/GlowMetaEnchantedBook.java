@@ -44,8 +44,9 @@ public class GlowMetaEnchantedBook extends GlowMetaItem implements EnchantmentSt
     @Override
     void writeNbt(CompoundTag tag) {
         super.writeNbt(tag);
-
-        writeNbtEnchants("StoredEnchantments", tag, storedEnchants);
+        if (storedEnchants != null) {
+            writeNbtEnchants("StoredEnchantments", tag, storedEnchants);
+        }
     }
 
     @Override

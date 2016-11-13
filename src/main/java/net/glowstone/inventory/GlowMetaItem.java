@@ -48,6 +48,9 @@ class GlowMetaItem implements ItemMeta {
         Map<String, Object> enchantList = new HashMap<>();
 
         for (Entry<Enchantment, Integer> enchantment : enchants.entrySet()) {
+            if (enchantment.getKey() == null) {
+                continue;
+            }
             enchantList.put(enchantment.getKey().getName(), enchantment.getValue());
         }
 
@@ -58,6 +61,9 @@ class GlowMetaItem implements ItemMeta {
         List<CompoundTag> ench = new ArrayList<>();
 
         for (Entry<Enchantment, Integer> enchantment : enchants.entrySet()) {
+            if (enchantment.getKey() == null) {
+                continue;
+            }
             CompoundTag enchantmentTag = new CompoundTag();
             enchantmentTag.putShort("id", enchantment.getKey().getId());
             enchantmentTag.putShort("lvl", enchantment.getValue());

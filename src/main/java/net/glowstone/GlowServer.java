@@ -109,7 +109,7 @@ public final class GlowServer implements Server {
     /**
      * The game version compatible with the server.
      */
-    public static final String GAME_VERSION_COMPATIBLE = "1.11-pre1";
+    public static final String GAME_VERSION_COMPATIBLE = "1.11";
 
     /**
      * The protocol version supported by the server.
@@ -119,7 +119,7 @@ public final class GlowServer implements Server {
     /**
      * The protocol version compatible with the server.
      */
-    public static final int PROTOCOL_VERSION_COMPATIBLE = 314;
+    public static final int PROTOCOL_VERSION_COMPATIBLE = 315;
 
     /**
      * A list of all the active {@link net.glowstone.net.GlowSession}s.

@@ -1894,4 +1894,8 @@ public final class GlowServer implements Server {
     public boolean isGenerationDisabled() {
         return config.getBoolean(Key.DISABLE_GENERATION);
     }
+
+    public boolean doesUseNewGen() {
+        return config.getBoolean(Key.NEW_GEN);
+    }
 }

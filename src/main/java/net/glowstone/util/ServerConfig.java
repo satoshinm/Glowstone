@@ -412,6 +412,7 @@ public final class ServerConfig {
         POPULATE_ANCHORED_CHUNKS("world.populate-anchored-chunks", true),
         WATER_CLASSIC("world.classic-style-water", false),
         DISABLE_GENERATION("world.disable-generation", false),
+        NEW_GEN("world.new-gen", false),
 
         // database
         DB_DRIVER("database.driver", "org.sqlite.JDBC", Migrate.BUKKIT, "database.driver"),

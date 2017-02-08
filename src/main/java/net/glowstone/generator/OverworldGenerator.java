@@ -1,5 +1,6 @@
 package net.glowstone.generator;
 
+import net.glowstone.GlowServer;
 import net.glowstone.GlowWorld;
 import net.glowstone.constants.GlowBiome;
 import net.glowstone.generator.ground.*;
@@ -7,13 +8,16 @@ import net.glowstone.generator.ground.MesaGroundGenerator.MesaType;
 import net.glowstone.generator.populators.OverworldPopulator;
 import net.glowstone.generator.populators.StructurePopulator;
 import net.glowstone.generator.populators.overworld.SnowPopulator;
+import net.glowstone.util.noise.PerlinNoise;
 import net.glowstone.util.noise.PerlinOctaveGenerator;
 import net.glowstone.util.noise.SimplexOctaveGenerator;
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.WorldType;
 import org.bukkit.block.Biome;
 import org.bukkit.util.noise.OctaveGenerator;
+import org.bukkit.util.noise.PerlinNoiseGenerator;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -169,54 +173,93 @@ public class OverworldGenerator extends GlowChunkGenerator {
     }
 
     private ChunkData generateRawTerrain(World world, int chunkX, int chunkZ) {
-        generateTerrainDensity(world, chunkX, chunkZ);
-
-        int seaLevel = world.getSeaLevel();
-
         ChunkData chunkData = createChunkData(world);
 
-        // Terrain densities where sampled at a lower res (scaled 4x along vertical, 8x along horizontal)
-        // so it's needed to re-scale it. Linear interpolation is used to fill in the gaps.
-        for (int i = 0; i < 5 - 1; i++) {
-            for (int j = 0; j < 5 - 1; j++) {
-                for (int k = 0; k < 33 - 1; k++) {
-                    // 2x2 grid
-                    double d1 = density[i][j][k];
-                    double d2 = density[i + 1][j][k];
-                    double d3 = density[i][j + 1][k];
-                    double d4 = density[i + 1][j + 1][k];
-                    // 2x2 grid (row above)
-                    double d5 = (density[i][j][k + 1] - d1) / 8;
-                    double d6 = (density[i + 1][j][k + 1] - d2) / 8;
-                    double d7 = (density[i][j + 1][k + 1] - d3) / 8;
-                    double d8 = (density[i + 1][j + 1][k + 1] - d4) / 8;
+        if (((GlowServer) Bukkit.getServer()).doesUseNewGen()) {
+            int seaLevel = world.getSeaLevel();
 
-                    for (int l = 0; l < 8; l++) {
-                        double d9 = d1;
-                        double d10 = d3;
-                        for (int m = 0; m < 4; m++) {
-                            double dens = d9;
-                            for (int n = 0; n < 4; n++) {
-                                // any density higher than 0 is ground, any density lower or equal to 0 is air
-                                // (or water if under the sea level).
-                                if (dens > 0) {
-                                    chunkData.setBlock(m + (i << 2), l + (k << 3), n + (j << 2), Material.STONE);
-                                } else if (l + (k << 3) < seaLevel - 1) {
-                                    chunkData.setBlock(m + (i << 2), l + (k << 3), n + (j << 2), Material.STATIONARY_WATER);
-                                }
-                                // interpolation along z
-                                dens += (d10 - d9) / 4;
-                            }
-                            // interpolation along x
-                            d9 += (d2 - d1) / 4;
-                            // interpolate along z
-                            d10 += (d4 - d3) / 4;
+            PerlinNoiseGenerator noise1 = new PerlinNoiseGenerator(world);
+            PerlinNoiseGenerator noise2 = new PerlinNoiseGenerator(new Random());
+            PerlinNoiseGenerator noise3 = new PerlinNoiseGenerator(new Random());
+            PerlinNoiseGenerator noise4 = new PerlinNoiseGenerator(new Random());
+            PerlinNoiseGenerator noise5 = new PerlinNoiseGenerator(new Random());
+            PerlinNoiseGenerator noise6 = new PerlinNoiseGenerator(new Random());
+            PerlinNoiseGenerator noise7 = new PerlinNoiseGenerator(new Random());
+
+            for (int i = 0; i < 16; i++) {
+                for (int j = 0; j < 16; j++) {
+                    for (int k = 0; k < 256; k++) {
+                        int multi = (int) Math.round(noise1.noise(i * 0.004, k * 0.004, j * 0.004));
+                        int x = i + multi * 8;
+                        int y = k + multi * 8;
+                        int z = j + multi * 8;
+                        double dens = -k + 72;
+                        dens += noise1.noise(x * 4.03, y * 4.03, z * 4.03) * 0.25;
+                        dens += noise2.noise(x * 1.96, y * 1.96, z * 1.96) * 0.5;
+                        dens += noise3.noise(x * 1.01, y * 1.01, z * 1.01);
+                        dens += noise4.noise(x * 0.56, y * 0.56, z * 0.56) * 2;
+                        dens += noise5.noise(x * 0.23, y * 0.23, z * 0.23) * 4;
+                        dens += noise6.noise(x * 0.117, y * 0.117, z * 0.117) * 8;
+                        dens += noise7.noise(x * 0.06, y * 0.06, z * 0.06) * 16;
+                        dens += PerlinNoise.floor((68 - k) * 3) * 16;
+                        // any density higher than 0 is ground, any density lower or equal to 0 is air
+                        // (or water if under the sea level).
+                        if (dens > 0) {
+                            chunkData.setBlock(i, k, j, Material.STONE);
+                        } else if (k < seaLevel - 1) {
+                            chunkData.setBlock(i, k, j, Material.STATIONARY_WATER);
                         }
-                        // interpolation along y
-                        d1 += d5;
-                        d3 += d7;
-                        d2 += d6;
-                        d4 += d8;
+                    }
+                }
+            }
+        } else {
+            generateTerrainDensity(world, chunkX, chunkZ);
+
+            int seaLevel = world.getSeaLevel();
+
+            // Terrain densities where sampled at a lower res (scaled 4x along vertical, 8x along horizontal)
+            // so it's needed to re-scale it. Linear interpolation is used to fill in the gaps.
+            for (int i = 0; i < 5 - 1; i++) {
+                for (int j = 0; j < 5 - 1; j++) {
+                    for (int k = 0; k < 33 - 1; k++) {
+                        // 2x2 grid
+                        double d1 = density[i][j][k];
+                        double d2 = density[i + 1][j][k];
+                        double d3 = density[i][j + 1][k];
+                        double d4 = density[i + 1][j + 1][k];
+                        // 2x2 grid (row above)
+                        double d5 = (density[i][j][k + 1] - d1) / 8;
+                        double d6 = (density[i + 1][j][k + 1] - d2) / 8;
+                        double d7 = (density[i][j + 1][k + 1] - d3) / 8;
+                        double d8 = (density[i + 1][j + 1][k + 1] - d4) / 8;
+
+                        for (int l = 0; l < 8; l++) {
+                            double d9 = d1;
+                            double d10 = d3;
+                            for (int m = 0; m < 4; m++) {
+                                double dens = d9;
+                                for (int n = 0; n < 4; n++) {
+                                    // any density higher than 0 is ground, any density lower or equal to 0 is air
+                                    // (or water if under the sea level).
+                                    if (dens > 0) {
+                                        chunkData.setBlock(m + (i << 2), l + (k << 3), n + (j << 2), Material.STONE);
+                                    } else if (l + (k << 3) < seaLevel - 1) {
+                                        chunkData.setBlock(m + (i << 2), l + (k << 3), n + (j << 2), Material.STATIONARY_WATER);
+                                    }
+                                    // interpolation along z
+                                    dens += (d10 - d9) / 4;
+                                }
+                                // interpolation along x
+                                d9 += (d2 - d1) / 4;
+                                // interpolate along z
+                                d10 += (d4 - d3) / 4;
+                            }
+                            // interpolation along y
+                            d1 += d5;
+                            d3 += d7;
+                            d2 += d6;
+                            d4 += d8;
+                        }
                     }
                 }
             }
@@ -226,7 +269,6 @@ public class OverworldGenerator extends GlowChunkGenerator {
     }
 
     private void generateTerrainDensity(World world, int x, int z) {
-
         WorldType type = world.getWorldType();
 
         // Scaling chunk x and z coordinates (4x, see below)

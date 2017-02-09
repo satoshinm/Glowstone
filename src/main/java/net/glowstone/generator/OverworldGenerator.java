@@ -10,6 +10,7 @@ import net.glowstone.generator.populators.StructurePopulator;
 import net.glowstone.generator.populators.overworld.SnowPopulator;
 import net.glowstone.util.noise.PerlinNoise;
 import net.glowstone.util.noise.PerlinOctaveGenerator;
+import net.glowstone.util.noise.SimplexNoise;
 import net.glowstone.util.noise.SimplexOctaveGenerator;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -17,7 +18,6 @@ import org.bukkit.World;
 import org.bukkit.WorldType;
 import org.bukkit.block.Biome;
 import org.bukkit.util.noise.OctaveGenerator;
-import org.bukkit.util.noise.PerlinNoiseGenerator;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -178,13 +178,15 @@ public class OverworldGenerator extends GlowChunkGenerator {
         if (((GlowServer) Bukkit.getServer()).doesUseNewGen()) {
             int seaLevel = world.getSeaLevel();
 
-            PerlinNoiseGenerator noise1 = new PerlinNoiseGenerator(world);
-            PerlinNoiseGenerator noise2 = new PerlinNoiseGenerator(new Random());
-            PerlinNoiseGenerator noise3 = new PerlinNoiseGenerator(new Random());
-            PerlinNoiseGenerator noise4 = new PerlinNoiseGenerator(new Random());
-            PerlinNoiseGenerator noise5 = new PerlinNoiseGenerator(new Random());
-            PerlinNoiseGenerator noise6 = new PerlinNoiseGenerator(new Random());
-            PerlinNoiseGenerator noise7 = new PerlinNoiseGenerator(new Random());
+            SimplexNoise noise1 = new SimplexNoise(new Random(world.getSeed()));
+            SimplexNoise noise2 = new SimplexNoise(new Random());
+            SimplexNoise noise3 = new SimplexNoise(new Random());
+            SimplexNoise noise4 = new SimplexNoise(new Random());
+            SimplexNoise noise5 = new SimplexNoise(new Random());
+            SimplexNoise noise6 = new SimplexNoise(new Random());
+            SimplexNoise noise7 = new SimplexNoise(new Random());
+            SimplexNoise noise8 = new SimplexNoise(new Random());
+            SimplexNoise noise9 = new SimplexNoise(new Random());
 
             for (int i = 0; i < 16; i++) {
                 for (int j = 0; j < 16; j++) {
@@ -194,14 +196,16 @@ public class OverworldGenerator extends GlowChunkGenerator {
                         int y = k + multi * 8;
                         int z = j + multi * 8;
                         double dens = -k + 72;
-                        dens += noise1.noise(x * 4.03, y * 4.03, z * 4.03) * 0.25;
-                        dens += noise2.noise(x * 1.96, y * 1.96, z * 1.96) * 0.5;
-                        dens += noise3.noise(x * 1.01, y * 1.01, z * 1.01);
-                        dens += noise4.noise(x * 0.56, y * 0.56, z * 0.56) * 2;
-                        dens += noise5.noise(x * 0.23, y * 0.23, z * 0.23) * 4;
-                        dens += noise6.noise(x * 0.117, y * 0.117, z * 0.117) * 8;
-                        dens += noise7.noise(x * 0.06, y * 0.06, z * 0.06) * 16;
-                        dens += PerlinNoise.floor((68 - k) * 3) * 16;
+                        dens += noise1.noise(x * 16.02, y * 16.02, z * 16.02) * 0.06125;
+                        dens += noise2.noise(x * 7.98, y * 7.98, z * 7.98) * 0.125;
+                        dens += noise3.noise(x * 4.03, y * 4.03, z * 4.03) * 0.25;
+                        dens += noise4.noise(x * 1.96, y * 1.96, z * 1.96) * 0.5;
+                        dens += noise5.noise(x * 1.01, y * 1.01, z * 1.01);
+                        dens += noise6.noise(x * 0.56, y * 0.56, z * 0.56) * 2;
+                        dens += noise7.noise(x * 0.23, y * 0.23, z * 0.23) * 4;
+                        dens += noise8.noise(x * 0.117, y * 0.117, z * 0.117) * 8;
+                        dens += noise9.noise(x * 0.06, y * 0.06, z * 0.06) * 16;
+                        dens += PerlinNoise.floor((-65 + k) * 3) * 16;
                         // any density higher than 0 is ground, any density lower or equal to 0 is air
                         // (or water if under the sea level).
                         if (dens > 0) {

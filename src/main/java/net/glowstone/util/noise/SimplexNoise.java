@@ -139,7 +139,7 @@ public class SimplexNoise extends PerlinNoise {
             n0 = 0.0;
         } else {
             t0 *= t0;
-            n0 = t0 * t0 * dot(grad3[gi0], x0, y0); // (x,y) of kernelGrad3 used for 2D gradient
+            n0 = t0 * t0 * dot(grad3[gi0], x0, y0); // (x,y) of grad3 used for 2D gradient
         }
 
         double t1 = 0.5 - x1 * x1 - y1 * y1;
@@ -163,18 +163,18 @@ public class SimplexNoise extends PerlinNoise {
         return 70.0 * (n0 + n1 + n2);
     }
 
-    private int[] grad3_1 = new int[]{1, 1, 0};
-    private int[] grad3_2 = new int[]{-1, 1, 0};
-    private int[] grad3_3 = new int[]{1, -1, 0};
-    private int[] grad3_4 = new int[]{-1, -1, 0};
-    private int[] grad3_5 = new int[]{1, 0, 1};
-    private int[] grad3_6 = new int[]{-1, 0, 1};
-    private int[] grad3_7 = new int[]{1, 0, -1};
-    private int[] grad3_8 = new int[]{-1, 0, -1};
-    private int[] grad3_9 = new int[]{0, 1, 1};
-    private int[] grad3_10 = new int[]{0, -1, 1};
-    private int[] grad3_11 = new int[]{0, 1, -1};
-    private int[] grad3_12 = new int[]{0, -1, -1};
+    private int[] grads0 = new int[]{1, 1, 0};
+    private int[] grads1 = new int[]{-1, 1, 0};
+    private int[] grads2 = new int[]{1, -1, 0};
+    private int[] grads3 = new int[]{-1, -1, 0};
+    private int[] grads4 = new int[]{1, 0, 1};
+    private int[] grads5 = new int[]{-1, 0, 1};
+    private int[] grads6 = new int[]{1, 0, -1};
+    private int[] grads7 = new int[]{-1, 0, -1};
+    private int[] grads8 = new int[]{0, 1, 1};
+    private int[] grads9 = new int[]{0, -1, 1};
+    private int[] grads10 = new int[]{0, 1, -1};
+    private int[] grads11 = new int[]{0, -1, -1};
     private double[] noise = new double[1];
 
     class SimplexKernel extends Kernel {
@@ -185,11 +185,39 @@ public class SimplexNoise extends PerlinNoise {
         private final double xin;
         private final double yin;
         private final double zin;
+        private final int[] grads0;
+        private final int[] grads1;
+        private final int[] grads2;
+        private final int[] grads3;
+        private final int[] grads4;
+        private final int[] grads5;
+        private final int[] grads6;
+        private final int[] grads7;
+        private final int[] grads8;
+        private final int[] grads9;
+        private final int[] grads10;
+        private final int[] grads11;
+        private final int[] permMod12;
+        private final int[] perm;
 
-        SimplexKernel(final double xin, final double yin, final double zin) {
+        SimplexKernel(final double xin, final double yin, final double zin, int[] grads0, int[] grads1, int[] grads2, int[] grads3, int[] grads4, int[] grads5, int[] grads6, int[] grads7, int[] grads8, int[] grads9, int[] grads10, int[] grads11, int[] permMod12, int[] perm) {
             this.xin = xin;
             this.yin = yin;
             this.zin = zin;
+            this.grads0 = grads0;
+            this.grads1 = grads1;
+            this.grads2 = grads2;
+            this.grads3 = grads3;
+            this.grads4 = grads4;
+            this.grads5 = grads5;
+            this.grads6 = grads6;
+            this.grads7 = grads7;
+            this.grads8 = grads8;
+            this.grads9 = grads9;
+            this.grads10 = grads10;
+            this.grads11 = grads11;
+            this.permMod12 = permMod12;
+            this.perm = perm;
         }
 
         @Override
@@ -279,9 +307,9 @@ public class SimplexNoise extends PerlinNoise {
             double z3 = z0 + G33;
 
             // Work out the hashed gradient indices of the four simplex corners
-            int ii = i & 255;
-            int jj = j & 255;
-            int kk = k & 255;
+            int ii = i ;
+            int jj = j ;
+            int kk = k ;
             int gi0 = permMod12[ii + perm[jj + perm[kk]]];
             int gi1 = permMod12[ii + i1 + perm[jj + j1 + perm[kk + k1]]];
             int gi2 = permMod12[ii + i2 + perm[jj + j2 + perm[kk + k2]]];
@@ -320,7 +348,7 @@ public class SimplexNoise extends PerlinNoise {
                 n3 = t3 * t3 * dot(getGrad3(gi3), x3, y3, z3);
             }
 
-            noise[0] = 32.0 * (n0 + n1 + n2 + n3);
+            //noise[0] = 32.0 * (n0 + n1 + n2 + n3);
         }
 
         private double dot(int[] g, final double x, final double y, final double z) {
@@ -328,52 +356,53 @@ public class SimplexNoise extends PerlinNoise {
         }
 
         public double getNoise() {
-            return noise[0];
+            //return noise[0];
+            return 0;
         }
 
-        public int[] getGrad3(int index) {
+        private int[] getGrad3(int index) {
             if (index == 0) {
-                return grad3_1;
+                return grads0;
             }
             if (index == 1) {
-                return grad3_2;
+                return grads1;
             }
             if (index == 2) {
-                return grad3_3;
+                return grads2;
             }
             if (index == 3) {
-                return grad3_4;
+                return grads3;
             }
             if (index == 4) {
-                return grad3_5;
+                return grads4;
             }
             if (index == 5) {
-                return grad3_6;
+                return grads5;
             }
             if (index == 6) {
-                return grad3_7;
+                return grads6;
             }
             if (index == 7) {
-                return grad3_8;
+                return grads7;
             }
             if (index == 8) {
-                return grad3_9;
+                return grads8;
             }
             if (index == 9) {
-                return grad3_10;
+                return grads9;
             }
             if (index == 10) {
-                return grad3_11;
+                return grads10;
             }
             if (index == 11) {
-                return grad3_12;
+                return grads11;
             }
-            return grad3_1;
+            return grads0;
         }
     }
 
     private double simplex3D(double xin, double yin, double zin) {
-        SimplexKernel kernel = new SimplexKernel(xin, yin, zin);
+        SimplexKernel kernel = new SimplexKernel(xin, yin, zin, grads0, grads1, grads2, grads3, grads4, grads5, grads6, grads7, grads8, grads9, grads10, grads11, permMod12, perm);
         kernel.execute(1);
         return kernel.getNoise();
     }

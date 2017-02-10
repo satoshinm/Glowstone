@@ -307,9 +307,9 @@ public class SimplexNoise extends PerlinNoise {
             double z3 = z0 + G33;
 
             // Work out the hashed gradient indices of the four simplex corners
-            int ii = i ;
-            int jj = j ;
-            int kk = k ;
+            int ii = i & 255;
+            int jj = j & 255;
+            int kk = k & 255;
             int gi0 = permMod12[ii + perm[jj + perm[kk]]];
             int gi1 = permMod12[ii + i1 + perm[jj + j1 + perm[kk + k1]]];
             int gi2 = permMod12[ii + i2 + perm[jj + j2 + perm[kk + k2]]];
@@ -403,6 +403,7 @@ public class SimplexNoise extends PerlinNoise {
 
     private double simplex3D(double xin, double yin, double zin) {
         SimplexKernel kernel = new SimplexKernel(xin, yin, zin, grads0, grads1, grads2, grads3, grads4, grads5, grads6, grads7, grads8, grads9, grads10, grads11, permMod12, perm);
+        kernel.setExecutionModeWithoutFallback(Kernel.EXECUTION_MODE.JTP);
         kernel.execute(1);
         return kernel.getNoise();
     }

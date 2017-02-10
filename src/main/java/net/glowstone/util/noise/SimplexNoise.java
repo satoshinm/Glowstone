@@ -139,7 +139,7 @@ public class SimplexNoise extends PerlinNoise {
             n0 = 0.0;
         } else {
             t0 *= t0;
-            n0 = t0 * t0 * dot(grad3[gi0], x0, y0); // (x,y) of grad3 used for 2D gradient
+            n0 = t0 * t0 * dot(grad3[gi0], x0, y0); // (x,y) of kernelGrad3 used for 2D gradient
         }
 
         double t1 = 0.5 - x1 * x1 - y1 * y1;
@@ -163,6 +163,7 @@ public class SimplexNoise extends PerlinNoise {
         return 70.0 * (n0 + n1 + n2);
     }
 
+<<<<<<< HEAD
     private int[] grads0 = new int[]{1, 1, 0};
     private int[] grads1 = new int[]{-1, 1, 0};
     private int[] grads2 = new int[]{1, -1, 0};
@@ -175,6 +176,20 @@ public class SimplexNoise extends PerlinNoise {
     private int[] grads9 = new int[]{0, -1, 1};
     private int[] grads10 = new int[]{0, 1, -1};
     private int[] grads11 = new int[]{0, -1, -1};
+=======
+    private int[] grad3_1 = new int[]{1, 1, 0};
+    private int[] grad3_2 = new int[]{-1, 1, 0};
+    private int[] grad3_3 = new int[]{1, -1, 0};
+    private int[] grad3_4 = new int[]{-1, -1, 0};
+    private int[] grad3_5 = new int[]{1, 0, 1};
+    private int[] grad3_6 = new int[]{-1, 0, 1};
+    private int[] grad3_7 = new int[]{1, 0, -1};
+    private int[] grad3_8 = new int[]{-1, 0, -1};
+    private int[] grad3_9 = new int[]{0, 1, 1};
+    private int[] grad3_10 = new int[]{0, -1, 1};
+    private int[] grad3_11 = new int[]{0, 1, -1};
+    private int[] grad3_12 = new int[]{0, -1, -1};
+>>>>>>> ba3da148938e54bc9986ccb4d153059abde3e4b5
     private double[] noise = new double[1];
 
     class SimplexKernel extends Kernel {
@@ -185,6 +200,7 @@ public class SimplexNoise extends PerlinNoise {
         private final double xin;
         private final double yin;
         private final double zin;
+<<<<<<< HEAD
         private final int[] grads0;
         private final int[] grads1;
         private final int[] grads2;
@@ -218,6 +234,13 @@ public class SimplexNoise extends PerlinNoise {
             this.grads11 = grads11;
             this.permMod12 = permMod12;
             this.perm = perm;
+=======
+
+        SimplexKernel(final double xin, final double yin, final double zin) {
+            this.xin = xin;
+            this.yin = yin;
+            this.zin = zin;
+>>>>>>> ba3da148938e54bc9986ccb4d153059abde3e4b5
         }
 
         @Override
@@ -348,7 +371,11 @@ public class SimplexNoise extends PerlinNoise {
                 n3 = t3 * t3 * dot(getGrad3(gi3), x3, y3, z3);
             }
 
+<<<<<<< HEAD
             //noise[0] = 32.0 * (n0 + n1 + n2 + n3);
+=======
+            noise[0] = 32.0 * (n0 + n1 + n2 + n3);
+>>>>>>> ba3da148938e54bc9986ccb4d153059abde3e4b5
         }
 
         private double dot(int[] g, final double x, final double y, final double z) {
@@ -356,6 +383,7 @@ public class SimplexNoise extends PerlinNoise {
         }
 
         public double getNoise() {
+<<<<<<< HEAD
             //return noise[0];
             return 0;
         }
@@ -398,12 +426,59 @@ public class SimplexNoise extends PerlinNoise {
                 return grads11;
             }
             return grads0;
+=======
+            return noise[0];
+        }
+
+        public int[] getGrad3(int index) {
+            if (index == 0) {
+                return grad3_1;
+            }
+            if (index == 1) {
+                return grad3_2;
+            }
+            if (index == 2) {
+                return grad3_3;
+            }
+            if (index == 3) {
+                return grad3_4;
+            }
+            if (index == 4) {
+                return grad3_5;
+            }
+            if (index == 5) {
+                return grad3_6;
+            }
+            if (index == 6) {
+                return grad3_7;
+            }
+            if (index == 7) {
+                return grad3_8;
+            }
+            if (index == 8) {
+                return grad3_9;
+            }
+            if (index == 9) {
+                return grad3_10;
+            }
+            if (index == 10) {
+                return grad3_11;
+            }
+            if (index == 11) {
+                return grad3_12;
+            }
+            return grad3_1;
+>>>>>>> ba3da148938e54bc9986ccb4d153059abde3e4b5
         }
     }
 
     private double simplex3D(double xin, double yin, double zin) {
+<<<<<<< HEAD
         SimplexKernel kernel = new SimplexKernel(xin, yin, zin, grads0, grads1, grads2, grads3, grads4, grads5, grads6, grads7, grads8, grads9, grads10, grads11, permMod12, perm);
         kernel.setExecutionModeWithoutFallback(Kernel.EXECUTION_MODE.JTP);
+=======
+        SimplexKernel kernel = new SimplexKernel(xin, yin, zin);
+>>>>>>> ba3da148938e54bc9986ccb4d153059abde3e4b5
         kernel.execute(1);
         return kernel.getNoise();
     }

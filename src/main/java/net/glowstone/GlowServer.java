@@ -1,8 +1,5 @@
 package net.glowstone;
 
-import com.avaje.ebean.config.DataSourceConfig;
-import com.avaje.ebean.config.dbplatform.SQLitePlatform;
-import com.avaje.ebeaninternal.server.lib.sql.TransactionIsolation;
 import com.flowpowered.network.Message;
 import io.netty.channel.epoll.Epoll;
 import lombok.Getter;
@@ -1737,23 +1734,6 @@ public final class GlowServer implements Server {
     @Override
     public double[] getTPS() {
         return new double[0];
-    }
-
-    @Override
-    public void configureDbConfig(com.avaje.ebean.config.ServerConfig dbConfig) {
-        DataSourceConfig ds = new DataSourceConfig();
-        ds.setDriver(config.getString(Key.DB_DRIVER));
-        ds.setUrl(config.getString(Key.DB_URL));
-        ds.setUsername(config.getString(Key.DB_USERNAME));
-        ds.setPassword(config.getString(Key.DB_PASSWORD));
-        ds.setIsolationLevel(TransactionIsolation.getLevel(config.getString(Key.DB_ISOLATION)));
-
-        if (ds.getDriver().contains("sqlite")) {
-            dbConfig.setDatabasePlatform(new SQLitePlatform());
-            dbConfig.getDatabasePlatform().getDbDdlSyntax().setIdentity("");
-        }
-
-        dbConfig.setDataSourceConfig(ds);
     }
 
     ////////////////////////////////////////////////////////////////////////////

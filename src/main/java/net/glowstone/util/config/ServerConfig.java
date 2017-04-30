@@ -334,7 +334,6 @@ public final class ServerConfig {
         ALLOW_CLIENT_MODS("server.allow-client-mods", true),
 
         // console
-        USE_JLINE("console.use-jline", true),
         CONSOLE_PROMPT("console.prompt", ">"),
         CONSOLE_DATE("console.date-format", "HH:mm:ss"),
         CONSOLE_LOG_DATE("console.log-date-format", "yyyy/MM/dd HH:mm:ss"),

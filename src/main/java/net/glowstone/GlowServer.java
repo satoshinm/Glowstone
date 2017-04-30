@@ -358,7 +358,6 @@ public final class GlowServer implements Server {
                 System.out.println("  --port, -p <port>              Sets the server listening port.");
                 System.out.println("  --host, -H <ip | hostname>     Sets the server listening address.");
                 System.out.println("  --onlinemode, -o <onlinemode>  Sets the server's online-mode.");
-                System.out.println("  --jline <true/false>           Enables or disables JLine console.");
                 System.out.println("  --plugins-dir, -P <directory>  Sets the plugin directory to use.");
                 System.out.println("  --worlds-dir, -W <directory>   Sets the world directory to use.");
                 System.out.println("  --update-dir, -U <directory>   Sets the plugin update folder to use.");
@@ -397,9 +396,6 @@ public final class GlowServer implements Server {
                 case "--onlinemode":
                 case "-o":
                     parameters.put(Key.ONLINE_MODE, Boolean.valueOf(args[++i]));
-                    break;
-                case "--jline":
-                    parameters.put(Key.USE_JLINE, Boolean.valueOf(args[++i]));
                     break;
                 case "--plugins-dir":
                 case "-P":
@@ -457,7 +453,7 @@ public final class GlowServer implements Server {
      */
     public void start() {
         // Determine console mode and start reading input
-        consoleManager.startConsole(config.getBoolean(Key.USE_JLINE));
+        consoleManager.startConsole();
         consoleManager.startFile(config.getString(Key.LOG_FILE));
 
         if (getProxySupport()) {

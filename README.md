@@ -91,10 +91,6 @@ are stored in the `logs/` subdirectory. The main configuration file is
 `bukkit.yml`. Settings from these two files will be copied over to Glowstone's
 configuration during the default configuration generation process.
 
-Glowstone uses [JLine](http://jline.github.io/jline2/) for console input and colored
-console output. The JLine console can be disabled in the configuration if a
-flat console is desired.
-
 Need more help? Check out [our wiki](https://github.com/GlowstoneMC/Glowstone/wiki#using-glowstone) for some guides that will help you with running,
 maintaining and configuring your Glowstone server.
 

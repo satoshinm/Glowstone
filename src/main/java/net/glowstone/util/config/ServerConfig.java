@@ -389,15 +389,6 @@ public final class ServerConfig {
         PLAYER_SAMPLE_COUNT("advanced.player-sample-count", 12),
         METRICS("advanced.metrics", true),
 
-        // query rcon etc
-        QUERY_ENABLED("extras.query-enabled", false, Migrate.PROPS, "enable-query"),
-        QUERY_PORT("extras.query-port", 25614, Migrate.PROPS, "query.port"),
-        QUERY_PLUGINS("extras.query-plugins", true, Migrate.BUKKIT, "settings.query-plugins"),
-        RCON_ENABLED("extras.rcon-enabled", false, Migrate.PROPS, "enable-rcon"),
-        RCON_PASSWORD("extras.rcon-password", "glowstone", Migrate.PROPS, "rcon.password"),
-        RCON_PORT("extras.rcon-port", 25575, Migrate.PROPS, "rcon.port"),
-        RCON_COLORS("extras.rcon-colors", true),
-
         // level props
         LEVEL_NAME("world.name", "world", Migrate.PROPS, "level-name"),
         LEVEL_SEED("world.seed", "", Migrate.PROPS, "level-seed"),

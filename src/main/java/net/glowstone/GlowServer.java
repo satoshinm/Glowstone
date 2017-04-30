@@ -25,8 +25,6 @@ import net.glowstone.map.GlowMapView;
 import net.glowstone.net.GameServer;
 import net.glowstone.net.SessionRegistry;
 import net.glowstone.net.message.play.game.ChatMessage;
-import net.glowstone.net.query.QueryServer;
-import net.glowstone.net.rcon.RconServer;
 import net.glowstone.scheduler.GlowScheduler;
 import net.glowstone.scheduler.WorldScheduler;
 import net.glowstone.scoreboard.GlowScoreboardManager;
@@ -243,14 +241,6 @@ public final class GlowServer implements Server {
      * The ticks until a player who has not played the game has been kicked, or 0.
      */
     private int idleTimeout;
-    /**
-     * The query server for this server, or null if disabled.
-     */
-    private QueryServer queryServer;
-    /**
-     * The Rcon server for this server, or null if disabled.
-     */
-    private RconServer rconServer;
     /**
      * The default icon, usually blank, used for the server list.
      */
@@ -569,24 +559,10 @@ public final class GlowServer implements Server {
             logger.info("Native epoll transport is enabled.");
         }
 
-        CountDownLatch latch = new CountDownLatch(3);
+        CountDownLatch latch = new CountDownLatch(1);
 
         networkServer = new GameServer(this, latch);
         networkServer.bind(getBindAddress(Key.SERVER_PORT));
-
-        if (config.getBoolean(Key.QUERY_ENABLED)) {
-            queryServer = new QueryServer(this, latch, config.getBoolean(Key.QUERY_PLUGINS));
-            queryServer.bind(getBindAddress(Key.QUERY_PORT));
-        } else {
-            latch.countDown();
-        }
-
-        if (config.getBoolean(Key.RCON_ENABLED)) {
-            rconServer = new RconServer(this, latch, config.getString(Key.RCON_PASSWORD));
-            rconServer.bind(getBindAddress(Key.RCON_PORT));
-        } else {
-            latch.countDown();
-        }
 
         try {
             latch.await();
@@ -644,12 +620,6 @@ public final class GlowServer implements Server {
         // It may take a second or two for Netty to totally clean up
         if (networkServer != null) {
             networkServer.shutdown();
-        }
-        if (queryServer != null) {
-            queryServer.shutdown();
-        }
-        if (rconServer != null) {
-            rconServer.shutdown();
         }
 
         // Save worlds
@@ -1022,15 +992,6 @@ public final class GlowServer implements Server {
      */
     public boolean getProxySupport() {
         return config.getBoolean(Key.PROXY_SUPPORT);
-    }
-
-    /**
-     * Get whether to use color codes in Rcon responses.
-     *
-     * @return True if color codes will be present in Rcon responses
-     */
-    public boolean useRconColors() {
-        return config.getBoolean(Key.RCON_COLORS);
     }
 
     public MaterialValueManager getMaterialValueManager() {

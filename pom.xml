@@ -27,7 +27,6 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <joml.version>1.9.2</joml.version>
         <bukkit.version>1.11.2-R0.1-SNAPSHOT</bukkit.version>
         <protocol.version>1.11.2</protocol.version>
     </properties>
@@ -99,11 +98,6 @@
             <groupId>org.jogamp.jocl</groupId>
             <artifactId>jocl-main</artifactId>
             <version>2.3.2</version>
-        </dependency>
-        <dependency>
-            <groupId>org.joml</groupId>
-            <artifactId>joml</artifactId>
-            <version>${joml.version}</version>
         </dependency>
         <!-- Automatically downloaded by Glowstone's library manager
         <dependency>

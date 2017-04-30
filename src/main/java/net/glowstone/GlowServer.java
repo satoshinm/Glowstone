@@ -1,8 +1,6 @@
 package net.glowstone;
 
 import com.flowpowered.network.Message;
-import io.netty.channel.epoll.Epoll;
-import lombok.Getter;
 import net.glowstone.block.BuiltinMaterialValueManager;
 import net.glowstone.block.MaterialValueManager;
 import net.glowstone.block.state.GlowDispenser;
@@ -22,7 +20,6 @@ import net.glowstone.io.PlayerDataService;
 import net.glowstone.io.PlayerStatisticIoService;
 import net.glowstone.io.ScoreboardIoService;
 import net.glowstone.map.GlowMapView;
-import net.glowstone.net.GameServer;
 import net.glowstone.net.SessionRegistry;
 import net.glowstone.net.message.play.game.ChatMessage;
 import net.glowstone.scheduler.GlowScheduler;
@@ -77,7 +74,6 @@ import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.security.KeyPair;
 import java.util.*;
-import java.util.concurrent.CountDownLatch;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -195,11 +191,6 @@ public final class GlowServer implements Server {
      * A RSA key pair used for encryption and authentication
      */
     private final KeyPair keyPair = SecurityUtils.generateKeyPair();
-    /**
-     * The network server used for network communication
-     */
-    @Getter
-    private GameServer networkServer;
     /**
      * A set of all online players.
      */
@@ -425,7 +416,6 @@ public final class GlowServer implements Server {
 
     public void run() {
         start();
-        bind();
         logger.info("Ready for connections.");
 
         if (doMetrics()) {
@@ -554,24 +544,6 @@ public final class GlowServer implements Server {
         }
     }
 
-    private void bind() {
-        if (Epoll.isAvailable()) {
-            logger.info("Native epoll transport is enabled.");
-        }
-
-        CountDownLatch latch = new CountDownLatch(1);
-
-        networkServer = new GameServer(this, latch);
-        networkServer.bind(getBindAddress(Key.SERVER_PORT));
-
-        try {
-            latch.await();
-        } catch (InterruptedException e) {
-            logger.log(Level.SEVERE, "Bind interrupted! ", e);
-            System.exit(1);
-        }
-    }
-
     public void setPort(int port) {
         this.port = port;
     }
@@ -614,12 +586,6 @@ public final class GlowServer implements Server {
         // Kick all players (this saves their data too)
         for (GlowPlayer player : new ArrayList<>(getRawOnlinePlayers())) {
             player.kickPlayer(getShutdownMessage(), false);
-        }
-
-        // Stop the network servers - starts the shutdown process
-        // It may take a second or two for Netty to totally clean up
-        if (networkServer != null) {
-            networkServer.shutdown();
         }
 
         // Save worlds

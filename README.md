@@ -73,7 +73,7 @@ cd Glowstone
 ### 2. Build
 
 ```sh
-./setup.sh
+mvn package
 ```
 
 The final jar will be placed in `target/` named `glowstone.jar`.

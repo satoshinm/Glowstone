@@ -6,6 +6,7 @@ import org.bukkit.Sound;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Shulker;
 import org.bukkit.util.BlockVector;
+import org.bukkit.DyeColor;
 
 public class GlowShulker extends GlowMonster implements Shulker {
 
@@ -72,4 +73,16 @@ public class GlowShulker extends GlowMonster implements Shulker {
     public enum Facing {
         DOWN, UP, NORTH, SOUTH, WEST, EAST
     }
+
+    @Override
+    public DyeColor getColor() {
+        // todo
+        return null;
+    }
+
+    @Override
+    public void setColor(DyeColor color) {
+        // todo
+    }
+
 }

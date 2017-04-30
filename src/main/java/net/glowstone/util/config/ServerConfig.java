@@ -391,7 +391,6 @@ public final class ServerConfig {
         METRICS("advanced.metrics", true),
         GPGPU("advanced.gpgpu", false),
         GPGPU_ANY_DEVICE("advanced.gpgpu-use-any-device", false),
-        RUN_CLIENT("advanced.run-glowclient", false),
 
         // query rcon etc
         QUERY_ENABLED("extras.query-enabled", false, Migrate.PROPS, "enable-query"),

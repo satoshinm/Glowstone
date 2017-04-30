@@ -13,7 +13,6 @@ import net.glowstone.block.MaterialValueManager;
 import net.glowstone.block.state.GlowDispenser;
 import net.glowstone.boss.BossBarManager;
 import net.glowstone.boss.GlowBossBar;
-import net.glowstone.client.GlowClient;
 import net.glowstone.command.*;
 import net.glowstone.constants.GlowEnchantment;
 import net.glowstone.constants.GlowPotionEffect;
@@ -299,11 +298,6 @@ public final class GlowServer implements Server {
     }
 
     /**
-     * The client instance backed by this server.
-     */
-    public static GlowClient client;
-
-    /**
      * Creates a new server on TCP port 25565 and starts listening for
      * connections.
      *
@@ -460,11 +454,6 @@ public final class GlowServer implements Server {
             } catch (IOException e) {
                 e.printStackTrace();
             }
-        }
-
-        if (config.getBoolean(Key.RUN_CLIENT)) {
-            client = new GlowClient(this);
-            client.run();
         }
     }
 

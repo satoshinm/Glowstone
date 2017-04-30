@@ -1,8 +1,6 @@
 package net.glowstone.util.mojangson;
 
 import net.glowstone.util.nbt.*;
-import org.apache.commons.lang3.tuple.ImmutablePair;
-import org.apache.commons.lang3.tuple.Pair;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -14,10 +12,13 @@ import java.util.Collection;
 @RunWith(Parameterized.class)
 public class TestMojangsonWrite {
 
-    private final Pair<Tag, String> testCase; // The tag to write, the expected output.
+    // The tag to write, the expected output.
+    private final Tag tag;
+    private final String expected;
 
     public TestMojangsonWrite(Tag tag, String expected) {
-        this.testCase = new ImmutablePair<>(tag, expected);
+        this.tag = tag;
+        this.expected = expected;
     }
 
     @Parameterized.Parameters
@@ -37,9 +38,9 @@ public class TestMojangsonWrite {
     @Test
     public void canWriteTag() {
         CompoundTag top = new CompoundTag();
-        top.getValue().put("value", testCase.getKey());
+        top.getValue().put("value", tag);
         String result = Mojangson.fromTag(top);
-        Assert.assertEquals("Could not write case for " + testCase.getKey().getType().getName() + ": Wrong output.", testCase.getValue(), result);
+        Assert.assertEquals("Could not write case for " + tag.getType().getName() + ": Wrong output.", expected, result);
     }
 
 }

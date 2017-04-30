@@ -8,7 +8,6 @@ import com.flowpowered.network.session.BasicSession;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
-import io.netty.channel.ChannelHandler;
 import io.netty.handler.codec.CodecException;
 import lombok.Getter;
 import net.glowstone.EventFactory;
@@ -17,19 +16,11 @@ import net.glowstone.entity.GlowPlayer;
 import net.glowstone.entity.meta.profile.PlayerProfile;
 import net.glowstone.io.PlayerDataService.PlayerReader;
 import net.glowstone.net.message.KickMessage;
-import net.glowstone.net.message.SetCompressionMessage;
-import net.glowstone.net.message.login.LoginSuccessMessage;
 import net.glowstone.net.message.play.entity.DestroyEntitiesMessage;
-import net.glowstone.net.message.play.game.PingMessage;
 import net.glowstone.net.message.play.game.UserListItemMessage;
 import net.glowstone.net.message.play.game.UserListItemMessage.Action;
 import net.glowstone.net.message.play.game.UserListItemMessage.Entry;
 import net.glowstone.net.message.play.player.BlockPlacementMessage;
-import net.glowstone.net.pipeline.CodecsHandler;
-import net.glowstone.net.pipeline.CompressionHandler;
-import net.glowstone.net.pipeline.EncryptionHandler;
-import net.glowstone.net.protocol.GlowProtocol;
-import net.glowstone.net.protocol.LoginProtocol;
 import net.glowstone.net.protocol.PlayProtocol;
 import net.glowstone.net.protocol.ProtocolType;
 import org.bukkit.Statistic;
@@ -38,7 +29,6 @@ import org.bukkit.event.player.PlayerKickEvent;
 import org.bukkit.event.player.PlayerLoginEvent;
 import org.bukkit.event.player.PlayerLoginEvent.Result;
 
-import javax.crypto.SecretKey;
 import java.net.InetSocketAddress;
 import java.util.*;
 import java.util.logging.Level;
@@ -80,15 +70,6 @@ public class GlowSession extends BasicSession {
      * The state of the connection
      */
     private boolean online;
-    /**
-     * The verify token used in authentication
-     */
-    private byte[] verifyToken;
-
-    /**
-     * The verify username used in authentication
-     */
-    private String verifyUsername;
 
     /**
      * A message describing under what circumstances the connection ended.
@@ -96,22 +77,10 @@ public class GlowSession extends BasicSession {
     private String quitReason;
 
     /**
-     * The hostname used to connect.
-     */
-    private String hostname;
-
-    /**
      * The version used to connect.
      */
     @Getter
     private int version = -1;
-
-    /**
-     * Data regarding a user who has connected through a proxy, used to
-     * provide online-mode UUID and properties and other data even if the
-     * server is running in offline mode. Null for non-proxied sessions.
-     */
-    private ProxyData proxyData;
 
     /**
      * The player associated with this session (if there is one).
@@ -139,11 +108,6 @@ public class GlowSession extends BasicSession {
     private boolean disconnected;
 
     /**
-     * If compression packet has been sent
-     */
-    private boolean compresssionSent;
-
-    /**
      * Creates a new session.
      *
      * @param server  The server this session belongs to.
@@ -151,7 +115,7 @@ public class GlowSession extends BasicSession {
      * @param connectionManager The connection manager to manage connections for this session.
      */
     public GlowSession(GlowServer server, Channel channel, ConnectionManager connectionManager) {
-        super(channel, ProtocolType.HANDSHAKE.getProtocol());
+        super(channel, ProtocolType.PLAY.getProtocol()); // todo: remove
         this.server = server;
         this.connectionManager = connectionManager;
         address = super.getAddress();
@@ -169,89 +133,9 @@ public class GlowSession extends BasicSession {
     ////////////////////////////////////////////////////////////////////////////
     // Auxiliary state
 
-    /**
-     * Get the randomly-generated verify token for this session.
-     *
-     * @return The verify token
-     */
-    public byte[] getVerifyToken() {
-        return verifyToken;
-    }
-
-    /**
-     * Sets the verify token of this session.
-     *
-     * @param verifyToken The verify token.
-     */
-    public void setVerifyToken(byte... verifyToken) {
-        this.verifyToken = verifyToken;
-    }
-
-    /**
-     * Gets the verify username for this session.
-     *
-     * @return The verify username.
-     */
-    public String getVerifyUsername() {
-        return verifyUsername;
-    }
-
-    /**
-     * Sets the verify username for this session.
-     *
-     * @param verifyUsername The verify username.
-     */
-    public void setVerifyUsername(String verifyUsername) {
-        this.verifyUsername = verifyUsername;
-    }
-
-    /**
-     * Get the {@link ProxyData} for this session if available.
-     *
-     * @return The proxy data to use, or null for an unproxied connection.
-     */
-    public ProxyData getProxyData() {
-        return proxyData;
-    }
-
-    /**
-     * Set the {@link ProxyData} for this session.
-     *
-     * @param proxyData The proxy data to use.
-     */
-    public void setProxyData(ProxyData proxyData) {
-        this.proxyData = proxyData;
-        address = proxyData.getAddress();
-        hostname = proxyData.getHostname();
-    }
-
-    /**
-     * Set the hostname the player used to connect to the server.
-     *
-     * @param hostname Hostname in "addr:port" format.
-     */
-    public void setHostname(String hostname) {
-        this.hostname = hostname;
-    }
-
     public void setVersion(int version) {
         if (this.version != -1) throw new IllegalStateException("Cannot set version twice");
         this.version = version;
-    }
-
-    /**
-     * Notify that the session is currently idle.
-     */
-    public void idle() {
-        if (pingMessageId == 0 && getProtocol() instanceof PlayProtocol) {
-            pingMessageId = random.nextInt();
-            if (pingMessageId == 0) {
-                pingMessageId++;
-            }
-            send(new PingMessage(pingMessageId));
-        } else {
-            disconnect("Timed out");
-        }
     }
 
     /**
@@ -331,7 +215,6 @@ public class GlowSession extends BasicSession {
         // initialize the player
         PlayerReader reader = server.getPlayerDataService().beginReadingData(profile.getUniqueId());
         player = new GlowPlayer(this, profile, reader);
-        finalizeLogin(profile);
 
         // isActive check here in case player disconnected after authentication,
         // but before the GlowPlayer initialization was completed
@@ -350,7 +233,7 @@ public class GlowSession extends BasicSession {
         }
 
         // login event
-        PlayerLoginEvent event = EventFactory.onPlayerLogin(player, hostname);
+        PlayerLoginEvent event = EventFactory.onPlayerLogin(player, "");
         if (event.getResult() != Result.ALLOWED) {
             disconnect(event.getKickMessage(), true);
             return;
@@ -444,7 +327,7 @@ public class GlowSession extends BasicSession {
         }
 
         // perform the kick, sending a kick message if possible
-        if (isActive() && (getProtocol() instanceof LoginProtocol || getProtocol() instanceof PlayProtocol)) {
+        if (isActive() && (getProtocol() instanceof PlayProtocol)) {
             // channel is both currently connected and in a protocol state allowing kicks
             sendWithFuture(new KickMessage(reason)).addListener(ChannelFutureListener.CLOSE);
         } else {
@@ -517,46 +400,6 @@ public class GlowSession extends BasicSession {
             }
             player = null; // in case we are disposed twice
         }
-    }
-
-    private void finalizeLogin(PlayerProfile profile) {
-        // enable compression if needed
-        int compression = getServer().getCompressionThreshold();
-        if (compression > 0) {
-            enableCompression(compression);
-        }
-
-        // send login response
-        send(new LoginSuccessMessage(profile.getUniqueId().toString(), profile.getName()));
-        setProtocol(ProtocolType.PLAY);
-    }
-
-    ////////////////////////////////////////////////////////////////////////////
-    // Pipeline management
-
-    public void setProtocol(ProtocolType protocol) {
-        getChannel().flush();
-
-        GlowProtocol proto = protocol.getProtocol();
-        updatePipeline("codecs", new CodecsHandler(proto));
-        setProtocol(proto);
-    }
-
-    public void enableEncryption(SecretKey sharedSecret) {
-        updatePipeline("encryption", new EncryptionHandler(sharedSecret));
-    }
-
-    public void enableCompression(int threshold) {
-        // set compression can only be sent once
-        if (!compresssionSent) {
-            send(new SetCompressionMessage(threshold));
-            updatePipeline("compression", new CompressionHandler(threshold));
-            compresssionSent = true;
-        }
-    }
-
-    private void updatePipeline(String key, ChannelHandler handler) {
-        getChannel().pipeline().replace(key, key, handler);
     }
 
     ////////////////////////////////////////////////////////////////////////////

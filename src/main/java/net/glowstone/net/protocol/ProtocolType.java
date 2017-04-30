@@ -4,9 +4,6 @@ package net.glowstone.net.protocol;
  * Enumeration of the different Minecraft protocol states.
  */
 public enum ProtocolType {
-    HANDSHAKE(new HandshakeProtocol()),
-    STATUS(new StatusProtocol()),
-    LOGIN(new LoginProtocol()),
     PLAY(new PlayProtocol());
 
     private final GlowProtocol protocol;

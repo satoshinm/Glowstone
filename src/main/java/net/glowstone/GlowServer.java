@@ -69,7 +69,6 @@ import org.json.simple.parser.ParseException;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import java.net.InetSocketAddress;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.security.KeyPair;
@@ -336,8 +335,6 @@ public final class GlowServer implements Server {
                 System.out.println("  --version, -v                  Shows version information and exits.");
                 System.out.println("  --configdir <directory>        Sets the configuration directory.");
                 System.out.println("  --configfile <file>            Sets the configuration file.");
-                System.out.println("  --port, -p <port>              Sets the server listening port.");
-                System.out.println("  --host, -H <ip | hostname>     Sets the server listening address.");
                 System.out.println("  --onlinemode, -o <onlinemode>  Sets the server's online-mode.");
                 System.out.println("  --plugins-dir, -P <directory>  Sets the plugin directory to use.");
                 System.out.println("  --worlds-dir, -W <directory>   Sets the world directory to use.");
@@ -365,14 +362,6 @@ public final class GlowServer implements Server {
                     break;
                 case "--configfile":
                     configFileName = args[++i];
-                    break;
-                case "--port":
-                case "-p":
-                    parameters.put(Key.SERVER_PORT, Integer.valueOf(args[++i]));
-                    break;
-                case "--host":
-                case "-H":
-                    parameters.put(Key.SERVER_IP, args[++i]);
                     break;
                 case "--onlinemode":
                 case "-o":
@@ -436,23 +425,11 @@ public final class GlowServer implements Server {
         consoleManager.startConsole();
         consoleManager.startFile(config.getString(Key.LOG_FILE));
 
-        if (getProxySupport()) {
-            if (getOnlineMode()) {
-                logger.warning("Proxy support is enabled, but online mode is enabled.");
-            } else {
-                logger.info("Proxy support is enabled.");
-            }
-        } else if (!getOnlineMode()) {
-            logger.warning("The server is running in offline mode! Only do this if you know what you're doing.");
-        }
-
         // Load player lists
         opsList.load();
         whitelist.load();
         nameBans.load();
         ipBans.load();
-        setPort(config.getInt(Key.SERVER_PORT));
-        setIp(config.getString(Key.SERVER_IP));
 
         try {
             LootingManager.load();
@@ -550,22 +527,6 @@ public final class GlowServer implements Server {
 
     public void setIp(String ip) {
         this.ip = ip;
-    }
-
-    /**
-     * Get the SocketAddress to bind to for a specified service.
-     *
-     * @param portKey The configuration key for the port to use.
-     * @return The SocketAddress
-     */
-    private InetSocketAddress getBindAddress(Key portKey) {
-        String ip = config.getString(Key.SERVER_IP);
-        int port = config.getInt(portKey);
-        if (ip.isEmpty()) {
-            return new InetSocketAddress(port);
-        } else {
-            return new InetSocketAddress(ip, port);
-        }
     }
 
     /**
@@ -912,15 +873,6 @@ public final class GlowServer implements Server {
     }
 
     /**
-     * Get the threshold to use for network compression defined in the config.
-     *
-     * @return The compression threshold, or -1 for no compression.
-     */
-    public int getCompressionThreshold() {
-        return config.getInt(Key.COMPRESSION_THRESHOLD);
-    }
-
-    /**
      * Get the default game difficulty defined in the config.
      *
      * @return The default difficulty.
@@ -949,15 +901,6 @@ public final class GlowServer implements Server {
      */
     public boolean populateAnchoredChunks() {
         return config.getBoolean(Key.POPULATE_ANCHORED_CHUNKS);
-    }
-
-    /**
-     * Get whether parsing of data provided by a proxy is enabled.
-     *
-     * @return True if a proxy is providing data to use.
-     */
-    public boolean getProxySupport() {
-        return config.getBoolean(Key.PROXY_SUPPORT);
     }
 
     public MaterialValueManager getMaterialValueManager() {

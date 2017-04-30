@@ -335,6 +335,8 @@ public final class GlowServer implements Server {
                 System.out.println("  --version, -v                  Shows version information and exits.");
                 System.out.println("  --configdir <directory>        Sets the configuration directory.");
                 System.out.println("  --configfile <file>            Sets the configuration file.");
+                System.out.println("  --port, -p <port>              Sets the server listening port.");
+                System.out.println("  --host, -H <ip | hostname>     Sets the server listening address.");
                 System.out.println("  --onlinemode, -o <onlinemode>  Sets the server's online-mode.");
                 System.out.println("  --plugins-dir, -P <directory>  Sets the plugin directory to use.");
                 System.out.println("  --worlds-dir, -W <directory>   Sets the world directory to use.");
@@ -362,6 +364,14 @@ public final class GlowServer implements Server {
                     break;
                 case "--configfile":
                     configFileName = args[++i];
+                    break;
+                case "--port":
+                case "-p":
+                    parameters.put(Key.SERVER_PORT, Integer.valueOf(args[++i]));
+                    break;
+                case "--host":
+                case "-H":
+                    parameters.put(Key.SERVER_IP, args[++i]);
                     break;
                 case "--onlinemode":
                 case "-o":
@@ -430,6 +440,8 @@ public final class GlowServer implements Server {
         whitelist.load();
         nameBans.load();
         ipBans.load();
+        setPort(config.getInt(Key.SERVER_PORT));
+        setIp(config.getString(Key.SERVER_IP));
 
         try {
             LootingManager.load();

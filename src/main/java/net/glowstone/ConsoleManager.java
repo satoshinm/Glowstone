@@ -32,7 +32,6 @@ public final class ConsoleManager {
     private final Map<ChatColor, String> replacements = new EnumMap<>(ChatColor.class);
     private final ChatColor[] colors = ChatColor.values();
 
-    private Reader reader;
     private ConsoleCommandSender sender;
 
     private boolean running = true;
@@ -46,9 +45,6 @@ public final class ConsoleManager {
 
         // add log handler which writes to console
         logger.addHandler(new FancyConsoleHandler());
-
-        // reader must be initialized before standard streams are changed
-        reader = System.console().reader();
 
         // set system output streams
         System.setOut(new PrintStream(new LoggerOutputStream(Level.INFO), true));

@@ -178,6 +178,9 @@ public final class ConsoleManager {
             String command = "";
             while (running) {
                 try {
+                    if (System.console() == null)
+                        break;
+
                     command = System.console().readLine(CONSOLE_PROMPT, new Object[] {});
 
                     if (command == null || command.trim().isEmpty())

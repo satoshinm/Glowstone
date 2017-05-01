@@ -115,7 +115,7 @@
     </dependencies>
 
     <build>
-        <finalName>glowstone</finalName>
+        <finalName>glowstone-light</finalName>
 
         <directory>${project.basedir}/target</directory>
 

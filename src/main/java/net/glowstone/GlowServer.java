@@ -1,19 +1,11 @@
 package net.glowstone;
 
-import com.avaje.ebean.config.DataSourceConfig;
-import com.avaje.ebean.config.dbplatform.SQLitePlatform;
-import com.avaje.ebeaninternal.server.lib.sql.TransactionIsolation;
 import com.flowpowered.network.Message;
-import com.jogamp.opencl.CLDevice;
-import com.jogamp.opencl.CLPlatform;
-import io.netty.channel.epoll.Epoll;
-import lombok.Getter;
 import net.glowstone.block.BuiltinMaterialValueManager;
 import net.glowstone.block.MaterialValueManager;
 import net.glowstone.block.state.GlowDispenser;
 import net.glowstone.boss.BossBarManager;
 import net.glowstone.boss.GlowBossBar;
-import net.glowstone.client.GlowClient;
 import net.glowstone.command.*;
 import net.glowstone.constants.GlowEnchantment;
 import net.glowstone.constants.GlowPotionEffect;
@@ -28,19 +20,16 @@ import net.glowstone.io.PlayerDataService;
 import net.glowstone.io.PlayerStatisticIoService;
 import net.glowstone.io.ScoreboardIoService;
 import net.glowstone.map.GlowMapView;
-import net.glowstone.net.GameServer;
 import net.glowstone.net.SessionRegistry;
 import net.glowstone.net.message.play.game.ChatMessage;
-import net.glowstone.net.query.QueryServer;
-import net.glowstone.net.rcon.RconServer;
 import net.glowstone.scheduler.GlowScheduler;
 import net.glowstone.scheduler.WorldScheduler;
 import net.glowstone.scoreboard.GlowScoreboardManager;
 import net.glowstone.util.*;
-import net.glowstone.util.bans.GlowBanList;
-import net.glowstone.util.bans.UuidListFile;
 import net.glowstone.util.config.ServerConfig;
 import net.glowstone.util.config.ServerConfig.Key;
+import net.glowstone.util.bans.GlowBanList;
+import net.glowstone.util.bans.UuidListFile;
 import net.glowstone.util.config.WorldConfig;
 import net.glowstone.util.loot.LootingManager;
 import net.md_5.bungee.api.chat.BaseComponent;
@@ -80,12 +69,10 @@ import org.json.simple.parser.ParseException;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import java.net.InetSocketAddress;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.security.KeyPair;
 import java.util.*;
-import java.util.concurrent.CountDownLatch;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -204,11 +191,6 @@ public final class GlowServer implements Server {
      */
     private final KeyPair keyPair = SecurityUtils.generateKeyPair();
     /**
-     * The network server used for network communication
-     */
-    @Getter
-    private GameServer networkServer;
-    /**
      * A set of all online players.
      */
     private final Set<GlowPlayer> onlinePlayers = new HashSet<>();
@@ -250,14 +232,6 @@ public final class GlowServer implements Server {
      */
     private int idleTimeout;
     /**
-     * The query server for this server, or null if disabled.
-     */
-    private QueryServer queryServer;
-    /**
-     * The Rcon server for this server, or null if disabled.
-     */
-    private RconServer rconServer;
-    /**
      * The default icon, usually blank, used for the server list.
      */
     private GlowServerIcon defaultIcon;
@@ -297,11 +271,6 @@ public final class GlowServer implements Server {
         Bukkit.setServer(this);
         loadConfig();
     }
-
-    /**
-     * The client instance backed by this server.
-     */
-    public static GlowClient client;
 
     /**
      * Creates a new server on TCP port 25565 and starts listening for
@@ -369,7 +338,6 @@ public final class GlowServer implements Server {
                 System.out.println("  --port, -p <port>              Sets the server listening port.");
                 System.out.println("  --host, -H <ip | hostname>     Sets the server listening address.");
                 System.out.println("  --onlinemode, -o <onlinemode>  Sets the server's online-mode.");
-                System.out.println("  --jline <true/false>           Enables or disables JLine console.");
                 System.out.println("  --plugins-dir, -P <directory>  Sets the plugin directory to use.");
                 System.out.println("  --worlds-dir, -W <directory>   Sets the world directory to use.");
                 System.out.println("  --update-dir, -U <directory>   Sets the plugin update folder to use.");
@@ -409,9 +377,6 @@ public final class GlowServer implements Server {
                 case "-o":
                     parameters.put(Key.ONLINE_MODE, Boolean.valueOf(args[++i]));
                     break;
-                case "--jline":
-                    parameters.put(Key.USE_JLINE, Boolean.valueOf(args[++i]));
-                    break;
                 case "--plugins-dir":
                 case "-P":
                     parameters.put(Key.PLUGIN_FOLDER, args[++i]);
@@ -450,7 +415,6 @@ public final class GlowServer implements Server {
 
     public void run() {
         start();
-        bind();
         logger.info("Ready for connections.");
 
         if (doMetrics()) {
@@ -461,124 +425,15 @@ public final class GlowServer implements Server {
                 e.printStackTrace();
             }
         }
-
-        if (config.getBoolean(Key.RUN_CLIENT)) {
-            client = new GlowClient(this);
-            client.run();
-        }
     }
-
-    /**
-     * Whether OpenCL is to be used by the server on this run.
-     */
-    private boolean isCLApplicable = true;
 
     /**
      * Starts this server.
      */
     public void start() {
         // Determine console mode and start reading input
-        consoleManager.startConsole(config.getBoolean(Key.USE_JLINE));
+        consoleManager.startConsole();
         consoleManager.startFile(config.getString(Key.LOG_FILE));
-
-        if (getProxySupport()) {
-            if (getOnlineMode()) {
-                logger.warning("Proxy support is enabled, but online mode is enabled.");
-            } else {
-                logger.info("Proxy support is enabled.");
-            }
-        } else if (!getOnlineMode()) {
-            logger.warning("The server is running in offline mode! Only do this if you know what you're doing.");
-        }
-
-        int openCLMajor = 1;
-        int openCLMinor = 2;
-
-        if (doesUseGPGPU()) {
-            int maxGpuFlops = 0;
-            int maxIntelFlops = 0;
-            int maxCpuFlops = 0;
-            CLPlatform bestPlatform = null;
-            CLPlatform bestIntelPlatform = null;
-            CLPlatform bestCpuPlatform = null;
-            // gets the max flops device across platforms on the computer
-            for (CLPlatform platform : CLPlatform.listCLPlatforms()) {
-                if (platform.isAtLeast(openCLMajor, openCLMinor) && platform.isExtensionAvailable("cl_khr_fp64")) {
-                    for (CLDevice device : platform.listCLDevices()) {
-                        if (device.getType() == CLDevice.Type.GPU) {
-                            int flops = device.getMaxComputeUnits() * device.getMaxClockFrequency();
-                            logger.info("Found " + device + " with " + flops + " flops");
-                            if (device.getVendor().contains("Intel")) {
-                                if (flops > maxIntelFlops) {
-                                    maxIntelFlops = flops;
-                                    logger.info("Device is best platform so far, on " + platform);
-                                    bestIntelPlatform = platform;
-                                } else if (flops == maxIntelFlops) {
-                                    if (bestIntelPlatform != null && bestIntelPlatform.getVersion().compareTo(platform.getVersion()) < 0) {
-                                        maxIntelFlops = flops;
-                                        logger.info("Device tied for flops, but had higher version on " + platform);
-                                        bestIntelPlatform = platform;
-                                    }
-                                }
-                            } else {
-                                if (flops > maxGpuFlops) {
-                                    maxGpuFlops = flops;
-                                    logger.info("Device is best platform so far, on " + platform);
-                                    bestPlatform = platform;
-                                } else if (flops == maxGpuFlops) {
-                                    if (bestPlatform != null && bestPlatform.getVersion().compareTo(platform.getVersion()) < 0) {
-                                        maxGpuFlops = flops;
-                                        logger.info("Device tied for flops, but had higher version on " + platform);
-                                        bestPlatform = platform;
-                                    }
-                                }
-                            }
-                        } else {
-                            int flops = device.getMaxComputeUnits() * device.getMaxClockFrequency();
-                            logger.info("Found " + device + " with " + flops + " flops");
-                            if (flops > maxCpuFlops) {
-                                maxCpuFlops = flops;
-                                logger.info("Device is best platform so far, on " + platform);
-                                bestCpuPlatform = platform;
-                            } else if (flops == maxCpuFlops) {
-                                if (bestCpuPlatform != null && bestCpuPlatform.getVersion().compareTo(platform.getVersion()) < 0) {
-                                    maxCpuFlops = flops;
-                                    logger.info("Device tied for flops, but had higher version on " + platform);
-                                    bestCpuPlatform = platform;
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-
-            if (config.getBoolean(Key.GPGPU_ANY_DEVICE)) {
-                if (maxGpuFlops - maxIntelFlops < 0 && maxCpuFlops - maxIntelFlops <= 0) {
-                    bestPlatform = bestIntelPlatform;
-                } else if (maxGpuFlops - maxCpuFlops < 0 && maxIntelFlops - maxCpuFlops < 0) {
-                    bestPlatform = bestCpuPlatform;
-                }
-            } else {
-                if (maxGpuFlops == 0) {
-                    if (maxIntelFlops == 0) {
-                        logger.info("No Intel graphics found, best platform is the best CPU platform we could find...");
-                        bestPlatform = bestCpuPlatform;
-                    } else {
-                        logger.info("No dGPU found, best platform is the best Intel graphics we could find...");
-                        bestPlatform = bestIntelPlatform;
-                    }
-                }
-            }
-
-            if (bestPlatform == null) {
-                isCLApplicable = false;
-                logger.info("Your system does not meet the OpenCL requirements for Glowstone. See if driver updates are available.");
-                logger.info("Required version: " + openCLMajor + '.' + openCLMinor);
-                logger.info("Required extensions: [ cl_khr_fp64 ]");
-            } else {
-                OpenCL.initContext(bestPlatform);
-            }
-        }
 
         // Load player lists
         opsList.load();
@@ -678,60 +533,12 @@ public final class GlowServer implements Server {
         }
     }
 
-    private void bind() {
-        if (Epoll.isAvailable()) {
-            logger.info("Native epoll transport is enabled.");
-        }
-
-        CountDownLatch latch = new CountDownLatch(3);
-
-        networkServer = new GameServer(this, latch);
-        networkServer.bind(getBindAddress(Key.SERVER_PORT));
-
-        if (config.getBoolean(Key.QUERY_ENABLED)) {
-            queryServer = new QueryServer(this, latch, config.getBoolean(Key.QUERY_PLUGINS));
-            queryServer.bind(getBindAddress(Key.QUERY_PORT));
-        } else {
-            latch.countDown();
-        }
-
-        if (config.getBoolean(Key.RCON_ENABLED)) {
-            rconServer = new RconServer(this, latch, config.getString(Key.RCON_PASSWORD));
-            rconServer.bind(getBindAddress(Key.RCON_PORT));
-        } else {
-            latch.countDown();
-        }
-
-        try {
-            latch.await();
-        } catch (InterruptedException e) {
-            logger.log(Level.SEVERE, "Bind interrupted! ", e);
-            System.exit(1);
-        }
-    }
-
     public void setPort(int port) {
         this.port = port;
     }
 
     public void setIp(String ip) {
         this.ip = ip;
-    }
-
-    /**
-     * Get the SocketAddress to bind to for a specified service.
-     *
-     * @param portKey The configuration key for the port to use.
-     * @return The SocketAddress
-     */
-    private InetSocketAddress getBindAddress(Key portKey) {
-        String ip = config.getString(Key.SERVER_IP);
-        int port = config.getInt(portKey);
-        if (ip.isEmpty()) {
-            return new InetSocketAddress(port);
-        } else {
-            return new InetSocketAddress(ip, port);
-        }
     }
 
     /**
@@ -752,18 +559,6 @@ public final class GlowServer implements Server {
         // Kick all players (this saves their data too)
         for (GlowPlayer player : new ArrayList<>(getRawOnlinePlayers())) {
             player.kickPlayer(getShutdownMessage(), false);
-        }
-
-        // Stop the network servers - starts the shutdown process
-        // It may take a second or two for Netty to totally clean up
-        if (networkServer != null) {
-            networkServer.shutdown();
-        }
-        if (queryServer != null) {
-            queryServer.shutdown();
-        }
-        if (rconServer != null) {
-            rconServer.shutdown();
         }
 
         // Save worlds
@@ -1090,15 +885,6 @@ public final class GlowServer implements Server {
     }
 
     /**
-     * Get the threshold to use for network compression defined in the config.
-     *
-     * @return The compression threshold, or -1 for no compression.
-     */
-    public int getCompressionThreshold() {
-        return config.getInt(Key.COMPRESSION_THRESHOLD);
-    }
-
-    /**
      * Get the default game difficulty defined in the config.
      *
      * @return The default difficulty.
@@ -1127,24 +913,6 @@ public final class GlowServer implements Server {
      */
     public boolean populateAnchoredChunks() {
         return config.getBoolean(Key.POPULATE_ANCHORED_CHUNKS);
-    }
-
-    /**
-     * Get whether parsing of data provided by a proxy is enabled.
-     *
-     * @return True if a proxy is providing data to use.
-     */
-    public boolean getProxySupport() {
-        return config.getBoolean(Key.PROXY_SUPPORT);
-    }
-
-    /**
-     * Get whether to use color codes in Rcon responses.
-     *
-     * @return True if color codes will be present in Rcon responses
-     */
-    public boolean useRconColors() {
-        return config.getBoolean(Key.RCON_COLORS);
     }
 
     public MaterialValueManager getMaterialValueManager() {
@@ -1846,23 +1614,6 @@ public final class GlowServer implements Server {
         return new double[0];
     }
 
-    @Override
-    public void configureDbConfig(com.avaje.ebean.config.ServerConfig dbConfig) {
-        DataSourceConfig ds = new DataSourceConfig();
-        ds.setDriver(config.getString(Key.DB_DRIVER));
-        ds.setUrl(config.getString(Key.DB_URL));
-        ds.setUsername(config.getString(Key.DB_USERNAME));
-        ds.setPassword(config.getString(Key.DB_PASSWORD));
-        ds.setIsolationLevel(TransactionIsolation.getLevel(config.getString(Key.DB_ISOLATION)));
-
-        if (ds.getDriver().contains("sqlite")) {
-            dbConfig.setDatabasePlatform(new SQLitePlatform());
-            dbConfig.getDatabasePlatform().getDbDdlSyntax().setIdentity("");
-        }
-
-        dbConfig.setDataSourceConfig(ds);
-    }
-
     ////////////////////////////////////////////////////////////////////////////
     // Configuration
 
@@ -2034,9 +1785,5 @@ public final class GlowServer implements Server {
 
     public boolean isGenerationDisabled() {
         return config.getBoolean(Key.DISABLE_GENERATION);
-    }
-
-    public boolean doesUseGPGPU() {
-        return isCLApplicable && config.getBoolean(Key.GPGPU);
     }
 }

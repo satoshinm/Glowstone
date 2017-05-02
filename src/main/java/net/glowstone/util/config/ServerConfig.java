@@ -334,7 +334,6 @@ public final class ServerConfig {
         ALLOW_CLIENT_MODS("server.allow-client-mods", true),
 
         // console
-        USE_JLINE("console.use-jline", true),
         CONSOLE_PROMPT("console.prompt", ">"),
         CONSOLE_DATE("console.date-format", "HH:mm:ss"),
         CONSOLE_LOG_DATE("console.log-date-format", "yyyy/MM/dd HH:mm:ss"),
@@ -385,22 +384,8 @@ public final class ServerConfig {
         EXACT_LOGIN_LOCATION("advanced.exact-login-location", false, Migrate.BUKKIT, "settings.use-exact-login-location"),
         PLUGIN_PROFILING("advanced.plugin-profiling", false, Migrate.BUKKIT, "settings.plugin-profiling"),
         WARNING_STATE("advanced.deprecated-verbose", "false", Migrate.BUKKIT, "settings.deprecated-verbose"),
-        COMPRESSION_THRESHOLD("advanced.compression-threshold", 256, Migrate.PROPS, "network-compression-threshold"),
-        PROXY_SUPPORT("advanced.proxy-support", false),
         PLAYER_SAMPLE_COUNT("advanced.player-sample-count", 12),
         METRICS("advanced.metrics", true),
-        GPGPU("advanced.gpgpu", false),
-        GPGPU_ANY_DEVICE("advanced.gpgpu-use-any-device", false),
-        RUN_CLIENT("advanced.run-glowclient", false),
-
-        // query rcon etc
-        QUERY_ENABLED("extras.query-enabled", false, Migrate.PROPS, "enable-query"),
-        QUERY_PORT("extras.query-port", 25614, Migrate.PROPS, "query.port"),
-        QUERY_PLUGINS("extras.query-plugins", true, Migrate.BUKKIT, "settings.query-plugins"),
-        RCON_ENABLED("extras.rcon-enabled", false, Migrate.PROPS, "enable-rcon"),
-        RCON_PASSWORD("extras.rcon-password", "glowstone", Migrate.PROPS, "rcon.password"),
-        RCON_PORT("extras.rcon-port", 25575, Migrate.PROPS, "rcon.port"),
-        RCON_COLORS("extras.rcon-colors", true),
 
         // level props
         LEVEL_NAME("world.name", "world", Migrate.PROPS, "level-name"),

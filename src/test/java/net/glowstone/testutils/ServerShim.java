@@ -1,6 +1,5 @@
 package net.glowstone.testutils;
 
-import com.avaje.ebean.config.ServerConfig;
 import net.glowstone.inventory.GlowItemFactory;
 import net.md_5.bungee.api.chat.BaseComponent;
 import org.bukkit.*;
@@ -282,11 +281,6 @@ public class ServerShim implements Server {
     @Override
     public boolean dispatchCommand(CommandSender sender, String commandLine) throws CommandException {
         return false;
-    }
-
-    @Override
-    public void configureDbConfig(ServerConfig config) {
-
     }
 
     @Override

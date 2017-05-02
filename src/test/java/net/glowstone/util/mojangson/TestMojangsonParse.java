@@ -4,8 +4,6 @@ import net.glowstone.util.mojangson.ex.MojangsonParseException;
 import net.glowstone.util.nbt.CompoundTag;
 import net.glowstone.util.nbt.Tag;
 import net.glowstone.util.nbt.TagType;
-import org.apache.commons.lang3.tuple.ImmutablePair;
-import org.apache.commons.lang3.tuple.Pair;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -17,10 +15,12 @@ import java.util.Collection;
 @RunWith(Parameterized.class)
 public class TestMojangsonParse {
 
-    private final Pair<TagType, String> testCase;
+    private final TagType tag;
+    private final String mojangson;
 
     public TestMojangsonParse(TagType tag, String mojangson) {
-        this.testCase = new ImmutablePair<>(tag, mojangson);
+        this.tag = tag;
+        this.mojangson = mojangson;
     }
 
     @Parameterized.Parameters
@@ -40,16 +40,16 @@ public class TestMojangsonParse {
     @Test
     public void canParseType() {
         try {
-            CompoundTag compound = Mojangson.parseCompound(testCase.getValue());
+            CompoundTag compound = Mojangson.parseCompound(mojangson);
             Tag value = compound.getValue().get("value");
 
             // Checks if the TagType of the case and the parsed type are equal.
-            if (value.getType() != testCase.getKey()) {
-                Assert.fail("Incorrect type parsing for case " + testCase.getKey().getName() + " (Got " + value.getType().getName() + ") for Mojansgon: " + testCase.getValue());
+            if (value.getType() != tag) {
+                Assert.fail("Incorrect type parsing for case " + tag.getName() + " (Got " + value.getType().getName() + ") for Mojansgon: " + mojangson);
             }
         } catch (MojangsonParseException e) {
             // Catches a parse failure.
-            Assert.fail("Could not parse case for " + testCase.getKey().getName() + "( " + testCase.getValue() + "): " + e.getMessage());
+            Assert.fail("Could not parse case for " + tag.getName() + "( " + mojangson + "): " + e.getMessage());
         }
     }
 }

@@ -2,7 +2,7 @@
 [![Join the Discord chat](https://img.shields.io/badge/discord-glowstone-738bd7.svg?style=flat-square)](https://discord.gg/TFJqhsC)
 [![Build Status](https://circleci.com/gh/GlowstoneMC/Glowstone/tree/master.png)](https://circleci.com/gh/GlowstoneMC/Glowstone/tree/master)
 
-# Glowstone
+# Glowstone Light
 
 A fast, customizable and compatible open source Minecraft server.
 
@@ -73,7 +73,7 @@ cd Glowstone
 ### 2. Build
 
 ```sh
-./setup.sh
+mvn package
 ```
 
 The final jar will be placed in `target/` named `glowstone.jar`.
@@ -90,10 +90,6 @@ are stored in the `logs/` subdirectory. The main configuration file is
 `config/glowstone.yml`, which replaces CraftBukkit's `server.properties` and
 `bukkit.yml`. Settings from these two files will be copied over to Glowstone's
 configuration during the default configuration generation process.
-
-Glowstone uses [JLine](http://jline.github.io/jline2/) for console input and colored
-console output. The JLine console can be disabled in the configuration if a
-flat console is desired.
 
 Need more help? Check out [our wiki](https://github.com/GlowstoneMC/Glowstone/wiki#using-glowstone) for some guides that will help you with running,
 maintaining and configuring your Glowstone server.

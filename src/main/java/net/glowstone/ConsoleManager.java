@@ -1,7 +1,5 @@
 package net.glowstone;
 
-import jline.console.ConsoleReader;
-import jline.console.completer.Completer;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandException;
 import org.bukkit.command.ConsoleCommandSender;
@@ -13,10 +11,6 @@ import org.bukkit.permissions.Permission;
 import org.bukkit.permissions.PermissionAttachment;
 import org.bukkit.permissions.PermissionAttachmentInfo;
 import org.bukkit.plugin.Plugin;
-import org.fusesource.jansi.Ansi;
-import org.fusesource.jansi.Ansi.Attribute;
-import org.fusesource.jansi.Ansi.Color;
-import org.fusesource.jansi.AnsiConsole;
 
 import java.io.*;
 import java.text.SimpleDateFormat;
@@ -38,17 +32,12 @@ public final class ConsoleManager {
     private final Map<ChatColor, String> replacements = new EnumMap<>(ChatColor.class);
     private final ChatColor[] colors = ChatColor.values();
 
-    private ConsoleReader reader;
     private ConsoleCommandSender sender;
 
     private boolean running = true;
-    private boolean jLine;
 
     public ConsoleManager(GlowServer server) {
         this.server = server;
-
-        // install Ansi code handler, which makes colors work on Windows
-        AnsiConsole.systemInstall();
 
         for (Handler h : logger.getHandlers()) {
             logger.removeHandler(h);
@@ -57,50 +46,16 @@ public final class ConsoleManager {
         // add log handler which writes to console
         logger.addHandler(new FancyConsoleHandler());
 
-        // reader must be initialized before standard streams are changed
-        try {
-            reader = new ConsoleReader();
-        } catch (IOException ex) {
-            logger.log(Level.SEVERE, "Exception initializing console reader", ex);
-        }
-        reader.addCompleter(new CommandCompleter());
-
         // set system output streams
         System.setOut(new PrintStream(new LoggerOutputStream(Level.INFO), true));
         System.setErr(new PrintStream(new LoggerOutputStream(Level.WARNING), true));
-
-        // set up colorization replacements
-        replacements.put(ChatColor.BLACK, Ansi.ansi().a(Attribute.RESET).fg(Color.BLACK).boldOff().toString());
-        replacements.put(ChatColor.DARK_BLUE, Ansi.ansi().a(Attribute.RESET).fg(Color.BLUE).boldOff().toString());
-        replacements.put(ChatColor.DARK_GREEN, Ansi.ansi().a(Attribute.RESET).fg(Color.GREEN).boldOff().toString());
-        replacements.put(ChatColor.DARK_AQUA, Ansi.ansi().a(Attribute.RESET).fg(Color.CYAN).boldOff().toString());
-        replacements.put(ChatColor.DARK_RED, Ansi.ansi().a(Attribute.RESET).fg(Color.RED).boldOff().toString());
-        replacements.put(ChatColor.DARK_PURPLE, Ansi.ansi().a(Attribute.RESET).fg(Color.MAGENTA).boldOff().toString());
-        replacements.put(ChatColor.GOLD, Ansi.ansi().a(Attribute.RESET).fg(Color.YELLOW).boldOff().toString());
-        replacements.put(ChatColor.GRAY, Ansi.ansi().a(Attribute.RESET).fg(Color.WHITE).boldOff().toString());
-        replacements.put(ChatColor.DARK_GRAY, Ansi.ansi().a(Attribute.RESET).fg(Color.BLACK).bold().toString());
-        replacements.put(ChatColor.BLUE, Ansi.ansi().a(Attribute.RESET).fg(Color.BLUE).bold().toString());
-        replacements.put(ChatColor.GREEN, Ansi.ansi().a(Attribute.RESET).fg(Color.GREEN).bold().toString());
-        replacements.put(ChatColor.AQUA, Ansi.ansi().a(Attribute.RESET).fg(Color.CYAN).bold().toString());
-        replacements.put(ChatColor.RED, Ansi.ansi().a(Attribute.RESET).fg(Color.RED).bold().toString());
-        replacements.put(ChatColor.LIGHT_PURPLE, Ansi.ansi().a(Attribute.RESET).fg(Color.MAGENTA).bold().toString());
-        replacements.put(ChatColor.YELLOW, Ansi.ansi().a(Attribute.RESET).fg(Color.YELLOW).bold().toString());
-        replacements.put(ChatColor.WHITE, Ansi.ansi().a(Attribute.RESET).fg(Color.WHITE).bold().toString());
-        replacements.put(ChatColor.MAGIC, Ansi.ansi().a(Attribute.BLINK_SLOW).toString());
-        replacements.put(ChatColor.BOLD, Ansi.ansi().a(Attribute.UNDERLINE_DOUBLE).toString());
-        replacements.put(ChatColor.STRIKETHROUGH, Ansi.ansi().a(Attribute.STRIKETHROUGH_ON).toString());
-        replacements.put(ChatColor.UNDERLINE, Ansi.ansi().a(Attribute.UNDERLINE).toString());
-        replacements.put(ChatColor.ITALIC, Ansi.ansi().a(Attribute.ITALIC).toString());
-        replacements.put(ChatColor.RESET, Ansi.ansi().a(Attribute.RESET).toString());
     }
 
     public ConsoleCommandSender getSender() {
         return sender;
     }
 
-    public void startConsole(boolean jLine) {
-        this.jLine = jLine;
-
+    public void startConsole() {
         sender = new ColoredCommandSender();
         CONSOLE_DATE = server.getConsoleDateFormat();
         for (Handler handler : logger.getHandlers()) {
@@ -137,18 +92,8 @@ public final class ConsoleManager {
     private String colorize(String string) {
         if (string.indexOf(ChatColor.COLOR_CHAR) < 0) {
             return string;  // no colors in the message
-        } else if (!jLine || !reader.getTerminal().isAnsiSupported()) {
-            return ChatColor.stripColor(string);  // color not supported
         } else {
-            // colorize or strip all colors
-            for (ChatColor color : colors) {
-                if (replacements.containsKey(color)) {
-                    string = string.replaceAll("(?i)" + color, replacements.get(color));
-                } else {
-                    string = string.replaceAll("(?i)" + color, "");
-                }
-            }
-            return string + Ansi.ansi().reset();
+            return ChatColor.stripColor(string);  // color not supported
         }
     }
 
@@ -227,36 +172,16 @@ public final class ConsoleManager {
         }
     }
 
-    private class CommandCompleter implements Completer {
-        @Override
-        public int complete(String buffer, int cursor, List<CharSequence> candidates) {
-            try {
-                List<String> completions = server.getScheduler().syncIfNeeded(() -> server.getCommandMap().tabComplete(sender, buffer));
-                if (completions == null) {
-                    return cursor;  // no completions
-                }
-                candidates.addAll(completions);
-
-                // location to position the cursor at (before autofilling takes place)
-                return buffer.lastIndexOf(' ') + 1;
-            } catch (Throwable t) {
-                logger.log(Level.WARNING, "Error while tab completing", t);
-                return cursor;
-            }
-        }
-    }
-
     private class ConsoleCommandThread extends Thread {
         @Override
         public void run() {
             String command = "";
             while (running) {
                 try {
-                    if (jLine) {
-                        command = reader.readLine(CONSOLE_PROMPT, null);
-                    } else {
-                        command = reader.readLine();
-                    }
+                    if (System.console() == null)
+                        break;
+
+                    command = System.console().readLine(CONSOLE_PROMPT, new Object[] {});
 
                     if (command == null || command.trim().isEmpty())
                         continue;
@@ -423,23 +348,7 @@ public final class ConsoleManager {
 
         @Override
         public synchronized void flush() {
-            try {
-                if (jLine) {
-                    reader.print(ConsoleReader.RESET_LINE + "");
-                    reader.flush();
-                    super.flush();
-                    try {
-                        reader.drawLine();
-                    } catch (Throwable ex) {
-                        reader.getCursorBuffer().clear();
-                    }
-                    reader.flush();
-                } else {
-                    super.flush();
-                }
-            } catch (IOException ex) {
-                logger.log(Level.SEVERE, "I/O exception flushing console output", ex);
-            }
+            super.flush();
         }
     }
 

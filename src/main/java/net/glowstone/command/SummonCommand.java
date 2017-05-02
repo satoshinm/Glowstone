@@ -8,8 +8,6 @@ import net.glowstone.io.entity.EntityStorage;
 import net.glowstone.util.mojangson.Mojangson;
 import net.glowstone.util.mojangson.ex.MojangsonParseException;
 import net.glowstone.util.nbt.CompoundTag;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.Validate;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.command.BlockCommandSender;
@@ -113,21 +111,25 @@ public class SummonCommand extends BukkitCommand {
         return true;
     }
 
+    public static boolean startsWithIgnoreCase(String s, String prefix) {
+        return s.toLowerCase().startsWith(prefix);
+    }
+
     @Override
     public List<String> tabComplete(CommandSender sender, String alias, String[] args) throws IllegalArgumentException {
-        Validate.notNull(sender, "Sender cannot be null", new Object[0]);
-        Validate.notNull(args, "Arguments cannot be null", new Object[0]);
-        Validate.notNull(alias, "Alias cannot be null", new Object[0]);
+        if (sender == null) throw new IllegalArgumentException("Sender cannot be null");
+        if (args == null) throw new IllegalArgumentException("Arguments cannot be null");
+        if (alias == null) throw new IllegalArgumentException("Alias cannot be null");
         if (args.length == 1) {
             String arg = args[0];
             ArrayList<String> completion = new ArrayList<>();
             for (EntityType type : EntityType.values()) {
-                if (checkSummon(null, type.getName()) && StringUtils.startsWithIgnoreCase(type.getName(), arg)) {
+                if (checkSummon(null, type.getName()) && startsWithIgnoreCase(type.getName(), arg)) {
                     completion.add(type.getName());
                 }
             }
             EntityRegistry.getRegisteredCustomEntities().forEach((d) -> {
-                if (StringUtils.startsWithIgnoreCase(d.getId(), arg))
+                if (startsWithIgnoreCase(d.getId(), arg))
                     completion.add(d.getId().toLowerCase());
             });
             return completion;
